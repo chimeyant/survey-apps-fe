@@ -1,0 +1,80 @@
+<template>
+  <div class="pb-4">
+    <nav
+      class="flex"
+      aria-label="Breadcrumb"
+    >
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <a
+            href="#"
+            @click=""
+            class="text-gray-700 hover:text-gray-900 inline-flex items-center"
+          >
+            <i class="ri-dashboard-2-fill text-2xl"></i>
+
+          </a>
+        </li>
+        <li
+          v-for="(breadcrumb, index) in breadcrumbs"
+          :key="breadcrumb.name"
+        >
+          <div class="flex items-center">
+            <svg
+              class="w-6 h-6 text-gray-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <a
+              href="#"
+              @click="router.push({name: breadcrumb.name })"
+              class="text-gray-700 hover:text-gray-900 ml-1 md:ml-2 text-sm font-medium"
+              :class="{
+                'text-xs font-semibold text-teal-500' : index == breadcrumbs.length -1
+              }"
+            >{{ breadcrumb.title }}</a>
+          </div>
+        </li>
+      </ol>
+    </nav>
+  </div>
+</template>
+
+<script>
+import { useRouter } from "vue-router";
+import { useAppStore } from "@/store/app";
+import { ref, watch } from "vue";
+
+export default {
+  props: {
+    breadcrumbs: {
+      type: Array,
+      default: [],
+    },
+  },
+  setup(props, { emit }) {
+    const store = useAppStore();
+    const router = useRouter();
+    const breadcrumbs = ref(props.breadcrumbs);
+
+    watch(
+      () => props.breadcrumbs,
+      (newVal) => {
+        breadcrumbs.value = newVal;
+      }
+    );
+
+    return {
+      router,
+      breadcrumbs,
+    };
+  },
+};
+</script>

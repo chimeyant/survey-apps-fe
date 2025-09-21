@@ -1,0 +1,37 @@
+
+import UPagination from "./Pagination/index.vue"
+import UComboBox from "./ComboBox/index.vue"
+import UPhoneInput from "./PhoneInput/index.vue"
+import UButton from "./Button/index.vue"
+import UTextField from "./TextField/index.vue"
+import UTextArea from "./TextArea/index.vue"
+import USwitch from "./Switch/index.vue"
+import UToast from "./Toast/index.vue"
+import UDataTable from "./DataTable/index.vue"
+import UDataMobile from "./DataMobile/index.vue"
+import UDropdownOpsi from "./DropwonOpsi/index.vue"
+import UFormDelete from "./FormDelete/index.vue"
+import USkeletonTable from "./SkeletonTable/index.vue"
+import UFormDialog from "./FormDialog/index.vue"
+import UFormDataTable from "./FormDataTable/index.vue"
+import UFormPage from "./FormPage/index.vue"
+import UFileUpload from "./FileUpload/index.vue"
+import UBreadcrumb from "./Breadcrumb/index.vue"
+import UChip from "./Chip/index.vue"
+import BarChart from "./Chart/Bar.vue"
+import PieChart from "./Chart/Pie.vue"
+import AreaChart from "./Chart/Area.vue"
+import CardOne from "./Card/CardOne.vue"
+import CardTwo from "./Card/CardTwo.vue"
+import CardThree from "./Card/CardThree.vue"
+import CardFour from "./Card/CardFour.vue"
+import UMap from "./Map/index.vue"
+import UThemeSwitcher from "./ThemeSwitcher/index.vue"
+import UThemeDemo from "./ThemeDemo/index.vue"
+import UFormCustomePage from "./FormCustomePage/index.vue"
+
+import UTable from "./Table/index.vue"
+
+
+
+export { UPagination, UComboBox, UPhoneInput, UButton, UTextField, UTextArea, USwitch, UToast, UDataTable, UDataMobile, UFormPage, UDropdownOpsi, UFormDelete, USkeletonTable, UFormDialog, UFormDataTable, UFileUpload, UBreadcrumb, UChip, BarChart, PieChart, AreaChart, CardOne, CardTwo, CardThree, CardFour, UMap, UThemeSwitcher, UThemeDemo, UFormCustomePage, UTable }
