@@ -191,7 +191,7 @@ export default {
     const variantClasses = computed(() => {
       const variants = {
         // Solid variants
-        primary: "border-l-4 border-l-green-700 bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 border border-transparent",
+        primary: "border-l-4 border-l-green-900 bg-green-600 text-white hover:bg-green-500 focus:ring-green-500 border border-transparent",
         secondary: "border-l-4 border-l-gray-700 bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500 border border-transparent",
         success: "border-l-4 border-l-green-700 bg-green-500 text-white hover:bg-green-600 focus:ring-green-500 border border-transparent",
         danger: "border-l-4 border-l-red-700 bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 border border-transparent",

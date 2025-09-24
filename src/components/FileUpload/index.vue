@@ -85,6 +85,16 @@
           <i class="ri-delete-bin-fill text-xl"></i>
         </div>
         
+        <!-- Camera Button -->
+        <div
+          v-if="accept.includes('image') || accept === '*'"
+          class="flex justify-center items-center h-full w-[50px] bg-green-500 hover:cursor-pointer hover:bg-green-600 text-white border-r border-green-600"
+          @click="openCamera"
+          title="Ambil foto dari kamera"
+        >
+          <i class="ri-camera-fill text-xl"></i>
+        </div>
+        
         <!-- Upload Button -->
         <div
           class="flex justify-center items-center h-full w-[50px] bg-cyan-500 hover:cursor-pointer hover:bg-cyan-600 text-white"
@@ -199,6 +209,64 @@
       </div>
     </div>
 
+    <!-- Camera Modal -->
+    <div
+      v-if="showCamera"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+      @click="closeCamera"
+    >
+      <div class="bg-white rounded-lg overflow-hidden max-w-2xl w-full mx-4">
+        <!-- Camera Header -->
+        <div class="flex justify-between items-center p-4 border-b">
+          <h3 class="text-lg font-semibold">Ambil Foto</h3>
+          <button
+            @click="closeCamera"
+            class="text-gray-500 hover:text-gray-700 text-xl"
+          >
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+
+        <!-- Camera Container -->
+        <div class="relative">
+          <video
+            ref="videoElement"
+            class="w-full h-64 md:h-96 object-cover"
+            autoplay
+            muted
+            playsinline
+          ></video>
+          <canvas ref="canvasElement" class="hidden"></canvas>
+        </div>
+
+        <!-- Camera Controls -->
+        <div class="flex justify-center items-center gap-4 p-4 border-t">
+          <button
+            type="button"
+            @click="switchCamera"
+            :disabled="!hasMultipleCameras"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i class="ri-refresh-line mr-2"></i>Switch
+          </button>
+          <button
+            type="button"
+            @click="capturePhoto"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center"
+          >
+            <i class="ri-camera-fill mr-2"></i>Capture
+          </button>
+          <button
+            type="button"
+            @click="retakePhoto"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            <i class="ri-refresh-line mr-2"></i>Retake
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Error message -->
     <p v-if="error" :id="`${inputId}-error`" class="mt-1 text-sm text-red-600">
       {{ error }}
@@ -295,6 +363,15 @@ export default {
     const showFullPreview = ref(false);
     const currentFile = ref(null);
     const inputId = `fileupload-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Camera related refs
+    const showCamera = ref(false);
+    const videoElement = ref(null);
+    const canvasElement = ref(null);
+    const stream = ref(null);
+    const hasMultipleCameras = ref(false);
+    const currentCameraIndex = ref(0);
+    const cameras = ref([]);
 
     // Computed properties
     const previewSizeClasses = computed(() => {
@@ -404,6 +481,108 @@ export default {
         link.href = downloadUrl;
         link.download = filename.value;
         link.click();
+      }
+    };
+
+    // Camera methods
+    const openCamera = async () => {
+      try {
+        showCamera.value = true;
+        await initializeCamera();
+      } catch (error) {
+        console.error('Error opening camera:', error);
+        showCamera.value = false;
+        store.setSnackbar('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', colors.value.ERROR, types.value.ERROR);
+      }
+    };
+
+    const initializeCamera = async () => {
+      try {
+        // Get available cameras
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameras.value = devices.filter(device => device.kind === 'videoinput');
+        hasMultipleCameras.value = cameras.value.length > 1;
+
+        // Get user media
+        const constraints = {
+          video: {
+            deviceId: cameras.value[currentCameraIndex.value]?.deviceId,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        };
+
+        stream.value = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        if (videoElement.value) {
+          videoElement.value.srcObject = stream.value;
+        }
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        throw error;
+      }
+    };
+
+    const switchCamera = async () => {
+      if (cameras.value.length <= 1) return;
+
+      currentCameraIndex.value = (currentCameraIndex.value + 1) % cameras.value.length;
+      
+      // Stop current stream
+      if (stream.value) {
+        stream.value.getTracks().forEach(track => track.stop());
+      }
+
+      // Initialize with new camera
+      await initializeCamera();
+    };
+
+    const capturePhoto = () => {
+      if (!videoElement.value || !canvasElement.value) return;
+
+      const canvas = canvasElement.value;
+      const video = videoElement.value;
+      const context = canvas.getContext('2d');
+
+      // Set canvas size to video size
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw video frame to canvas
+      context.drawImage(video, 0, 0);
+
+      // Convert canvas to blob
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          const file = new File([blob], `camera_photo_${Date.now()}.jpg`, {
+            type: 'image/jpeg'
+          });
+          
+          // Set the file to input and trigger upload
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          fileInput.value.files = dataTransfer.files;
+          
+          await postUpload();
+          closeCamera();
+        }
+      }, 'image/jpeg', 0.8);
+    };
+
+    const retakePhoto = () => {
+      // Reset camera view
+      if (videoElement.value) {
+        videoElement.value.play();
+      }
+    };
+
+    const closeCamera = () => {
+      showCamera.value = false;
+      
+      // Stop camera stream
+      if (stream.value) {
+        stream.value.getTracks().forEach(track => track.stop());
+        stream.value = null;
       }
     };
 
@@ -539,6 +718,17 @@ export default {
       downloadFile,
       formatFileSize,
       formatDate,
+      
+      // Camera functionality
+      showCamera,
+      videoElement,
+      canvasElement,
+      hasMultipleCameras,
+      openCamera,
+      closeCamera,
+      capturePhoto,
+      retakePhoto,
+      switchCamera,
       
       // Label functionality
       inputId,

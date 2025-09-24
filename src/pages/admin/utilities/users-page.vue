@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import userModule from "@/modules/adminpages/utility/users.vue";
+import userModule from "@/modules/admins/utilities/users.vue";
 export default {
   components: {
     userModule,

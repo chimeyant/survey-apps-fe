@@ -15,8 +15,8 @@
              :class="`bg-gradient-to-t from-${themeColors.primary}-700 to-${themeColors.primary}-950`">
           <div class="flex items-center justify-between px-2 pt-2">
             <div v-if="!minimised" class="w-full text-start text-white">
-              <div class="font-bold text-xl italic tracking-wider">SIMPELIN</div>
-              <div class="text-sm font-bold animate-pulse">Ver. 1.00</div>
+              <div class="font-bold text-sm italic tracking-wider">Survey Manajemen Sistem</div>
+              <div class="text-xs font-bold animate-pulse">Ver. 1.00</div>
             </div>
             <div v-else class="flex-1 flex justify-center">
               <img src="/simpelin.png" alt="Logo" class="w-8 h-8 rounded-full" />
@@ -229,6 +229,7 @@
                   role="menuitem"
                   tabindex="-1"
                   id="menu-item-0"
+                  @click="changePassword"
                 >Ganti Kata Sandi</a>
                 <a
                   href="#"
@@ -279,7 +280,7 @@
               | Records : {{ table.footer.total }}
             </div>
           </div>
-          <div class="text-xs hidden sm:block" :class="`text-${themeColors.primary}-700`">&copy; Dinas Komunikasi Dan Informatika Provinsi Banten</div>
+          <div class="text-xs hidden sm:block" :class="`text-${themeColors.primary}-700`">&copy; Dinas Komunikasi Dan Informatika Kabupaten Tangerang</div>
           <!-- pagination -->
           <UPagination
             v-if="page.showtable"
@@ -345,11 +346,11 @@ export default {
     const fetchUserInfo = () => {
       store.getUserInfo().then(()=>{
         store.fetchMenus()
-        if(user.value.role.name == "User"){
-          router.push({name: "user-dashboard"})
-        }else{
-          router.push({name: "dashboard"})
-        }
+        // if(user.value.role.name == "User"){
+        //   router.push({name: "user-dashboard"})
+        // }else{
+        //   router.push({name: "dashboard"})
+        // }
       });
     };
 
@@ -379,6 +380,10 @@ export default {
 
     const updateClock = () => {
       time.value = getyCurrentTime();
+    };
+
+    const changePassword = () => {
+      router.push({name: "change-password"});
     };
 
     const postSignOut = async () => {
@@ -430,6 +435,7 @@ export default {
       minimised,
       toggleMinimised,
       themeColors,
+      changePassword,
     };
   },
 };

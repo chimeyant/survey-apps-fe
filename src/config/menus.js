@@ -22,70 +22,45 @@ const menus = {
                 icon: "ri-database-2-fill",
                 submenus: [
                     {
-                        title: "Master Dinas",
+                        title: "Kecamatan",
                         props: {
                             type: "item",
                             icon: "ri-menu-line",
-                            route: "master-data-agency-master"
+                            route: "master-data-district-management"
                         }
                     },
                     {
-                        title: "Bidang",
+                        title: "Desa|Kelurahan",
                         props: {
                             type: "item",
                             icon: "ri-menu-line",
-                            route: "master-data-division-master"
-                        }
-                    },
-                    {
-                        title: "Kategori Layanan",
-                        props: {
-                            type: "item",
-                            icon: "ri-menu-line",
-                            route: "master-data-service-category-master"
-                        }
-                    },
-                    {
-                        title: "Sub Kategori Layanan",
-                        props: {
-                            type: "item",
-                            icon: "ri-menu-line",
-                            route: "master-data-service-sub-category-master"
-                        }
-                    },
-                    {
-                        title: "Jabatan",
-                        props: {
-                            type: "item",
-                            icon: "ri-menu-line",
-                            route: "master-data-position-master"
-                        }
-                    },
-                    {
-                        title: "Pejabat Dinas",
-                        props: {
-                            type: "item",
-                            icon: "ri-menu-line",
-                            route: "master-data-official-master"
+                            route: "master-data-village-management"
                         }
                     }
-
                 ]
 
             }
         },
         {
-            title: "Permohonan",
+            title: "Survey",
             props: {
                 type: "group",
-                icon: "ri-stack-fill",
+                icon: "ri-megaphone-line",
                 submenus: [
                     {
-                        title: "Menu 1",
+                        title: "Topik",
                         props: {
                             type: "item",
                             icon: "ri-menu-line",
-                            route: "/auth/logged/data-master/menu-1"
+                            route: "survey-topic-management"
+                        }
+                    },
+                    {
+                        title: "Data",
+                        props: {
+                            type: "item",
+                            icon: "ri-menu-line",
+                            route: "survey-data-management"
                         }
                     }
                 ]
@@ -111,7 +86,7 @@ const menus = {
             props: {
                 type: "item",
                 icon: "ri-shield-user-fill",
-                route: "/auth/logged/utilities/roles-management"
+                route: "utilities-roles-management"
             }
         },
         {

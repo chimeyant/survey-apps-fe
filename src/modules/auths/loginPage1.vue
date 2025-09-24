@@ -4,18 +4,20 @@
       <!-- Login Card -->
       <div class="bg-white rounded-2xl shadow-2xl p-8">
         <!-- Logo and Title -->
-        <div class="text-center mb-8">
-          <div class="flex justify-center items-center mb-4">
-            <div class="w-[100px] h-[100px]">
+        <div class="text-center mb-5">
+          <div class="flex justify-center items-center mb-2">
+            <div class="w-[200px] h-[200px]">
               <img
-                src="/ski.png"
+                src="/sms.png"
                 alt="LOGO SIMPELIN"
                 class="w-full h-full object-contain"
               >
             </div>
-            <div class="text-cyan font-bold text-2xl italic tracking-wide ml-2"></div>
+            <div class="text-cyan font-bold  italic tracking-wide ml-2"></div>
           </div>
-          <div class="text-sm text-cyan-600 mb-6">Sistem Survey Fasilitas Internet</div>
+          <div class="text-sm text-cyan-600 mb-6">
+            Silahkan masukan email dan kata sandi Anda untuk melanjutkan
+          </div>
         </div>
 
         <!-- Error Message -->

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import changepassword from "@/modules/adminpages/utility/changepassword.vue";
+import changepassword from "@/modules/admins/utilities/changepassword.vue";
 export default {
   components: {
     changepassword,

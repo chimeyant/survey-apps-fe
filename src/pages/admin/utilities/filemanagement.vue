@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import filemanagement from "../../../modules/adminpages/utility/filemanagement.vue";
+import filemanagement from "@/modules/admins/utilities/filemanagement.vue";
 export default {
   components: {
     filemanagement,

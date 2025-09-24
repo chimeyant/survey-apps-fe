@@ -1,46 +1,57 @@
 
 import { createRouter, createWebHistory } from "vue-router";
-import login from "../pages/auth/login.vue"
-import loginPage1 from "../pages/auth/login_page1.vue"
-import base from "../layouts/base.vue"
-import dashboard from '../pages/dashboard.vue'
 import authProvider from "@/provider/authProviders"
+import base from "@/layouts/base.vue"
+import login from "@/pages/auth/login-page.vue"
+import dashboard from '@/pages/dashboard/index.vue'
 
 //import Page Master Data
-import masterdataAgencyMaster from '@/pages/admin/masterdata/agency-master.vue'
-import masterdataDivisionMaster from '@/pages/admin/masterdata/division-master.vue'
-import masterdataServiceCategoryMaster from '@/pages/admin/masterdata/service-category-master.vue'
-import masterdataServiceSubCategoryMaster from '@/pages/admin/masterdata/service-sub-category-master.vue'
-import masterdataPositionMaster from '@/pages/admin/masterdata/position-master.vue'
-import masterdataOfficialMaster from '@/pages/admin/masterdata/official-master.vue'
-import masterdataServiceCategoryDocumentMaster from '@/pages/admin/masterdata/service-category-document-master.vue'
-
-
-//import Page User 
-import userDashboard from "@/pages/user/dashboard/index.vue";
-import userApplication from '@/pages/user/application/index.vue'
-
-
+import masterdataDistrict from "@/pages/admin/masterdata/district-page.vue"
+import masterdataVillage from "@/pages/admin/masterdata/village-page.vue"
 
 // Import Page Utility Group
-import utilityUser from "@/pages/admin/utilities/users-management.vue"
+// import utilityRoles from "@/pages/admin/utilities/roles-page.vue"
+import utilityUser from "@/pages/admin/utilities/users-page.vue"
 import utilityfilemanagement from "@/pages/admin/utilities/filemanagement.vue"
-import utilityChangePassword from "@/pages/admin/utilities/changepassword.vue"
+import utilityRoles from "@/pages/admin/utilities/roles-page.vue"
+import utilityChangePassword from "@/pages/admin/utilities/changepassword-page.vue"
+
+// Import Page Survey
+import surveyTopic from "@/pages/admin/survey/topic-page.vue"
+import surveyTopicDocument from "@/pages/admin/survey/topic-document-page.vue"
+import surveyTopicCategory from "@/pages/admin/survey/topic-category-page.vue"
+import surveyData from "@/pages/admin/survey/data-pages.vue"
+import survey from "@/pages/landing/survey-page.vue"
+import sendingSuccess from "@/pages/landing/sending-success.vue"
+
 
 // Import Theme Demo
-import themeDemo from "@/components/ThemeDemo/index.vue"
-import themeTest from "@/components/ThemeTest/index.vue"
+// import themeDemo from "@/components/ThemeDemo/index.vue"
+// import themeTest from "@/components/ThemeTest/index.vue"
 
 const routes = [
     {
         path: '',
-        name: 'login',
-        component: login
+        redirect: 'survey'
     },
     {
-        path: '/auth/login-page1',
-        name: 'login_page1',
-        component: loginPage1
+        path: '/auth',
+        redirect: 'auth/login'
+    },
+    {
+        path: '/survey',
+        name: 'survey',
+        component: survey,
+    },
+    {
+        path: '/sending-success',
+        name: 'sending-success',
+        component: sendingSuccess,
+    },
+    {
+        path: '/auth/login',
+        name: 'login',
+        component: login
     },
     {
         path: '/auth/logged',
@@ -55,54 +66,37 @@ const routes = [
                 component: dashboard,
             },
 
-            /**
-             * Route Master Data
-             */
+            // /**
+            //  * Route Master Data
+            //  */
             {
-                path: "/auth/logged/master-data/agency-master",
-                name: "master-data-agency-master",
-                component: masterdataAgencyMaster,
+                path: "/auth/logged/master-data/district-management",
+                name: "master-data-district-management",
+                component: masterdataDistrict,
             },
             {
-                path: "/auth/logged/master-data/division-master",
-                name: "master-data-division-master",
-                component: masterdataDivisionMaster,
-            },
-            {
-                path: "/auth/logged/master-data/service-category-master",
-                name: "master-data-service-category-master",
-                component: masterdataServiceCategoryMaster,
-            },
-            {
-                path: "/auth/logged/master-data/service-sub-category-master",
-                name: "master-data-service-sub-category-master",
-                component: masterdataServiceSubCategoryMaster,
-            },
-            {
-                path: "/auth/logged/master-data/position-master",
-                name: "master-data-position-master",
-                component: masterdataPositionMaster,
-            },
-            {
-                path: "/auth/logged/master-data/official-master",
-                name: "master-data-official-master",
-                component: masterdataOfficialMaster,
-            },
-            {
-                path: "/auth/logged/master-data/service-category-document-master/:service_category_master_uuid",
-                name: "master-data-service-category-document-master",
-                component: masterdataServiceCategoryDocumentMaster,
+                path: "/auth/logged/master-data/village-management",
+                name: "master-data-village-management",
+                component: masterdataVillage,
             },
 
 
-            /**
-             * Route Utility
-             */
+
+
+            // /**
+            //  * Route Utility
+            //  */
+            {
+                path: "/auth/logged/utilities/roles-management",
+                name: "utilities-roles-management",
+                component: utilityRoles,
+            },
             {
                 path: "/auth/logged/utilities/users-management",
                 name: "utilities-users-management",
                 component: utilityUser,
-            }, {
+            },
+            {
                 path: "/auth/logged/utilities/filemanagement",
                 name: "utilities-filemanagement",
                 component: utilityfilemanagement,
@@ -114,33 +108,44 @@ const routes = [
                 component: utilityChangePassword,
             },
 
-            /**
-             * Route Theme Demo
-             */
+            // /**
+            //  * Route Survey
+            //  */
             {
-                path: "/auth/logged/theme-demo",
-                name: "theme-demo",
-                component: themeDemo,
+                path: "/auth/logged/survey/topic-management",
+                name: "survey-topic-management",
+                component: surveyTopic,
             },
             {
-                path: "/auth/logged/theme-test",
-                name: "theme-test",
-                component: themeTest,
-            },
-
-            /**
-             * Router User
-             */
-            {
-                path: "/auth/logged/user/dashboard",
-                name: "user-dashboard",
-                component: userDashboard,
+                path: "/auth/logged/survey/topic-document-management/:survey_topic_id",
+                name: "survey-topic-document-management",
+                component: surveyTopicDocument,
             },
             {
-                path: "/auth/logged/user/application",
-                name: "user-application",
-                component: userApplication,
+                path: "/auth/logged/survey/topic-category-management/:survey_topic_id",
+                name: "survey-topic-category-management",
+                component: surveyTopicCategory,
+            },
+            {
+                path: "/auth/logged/survey/data-management",
+                name: "survey-data-management",
+                component: surveyData,
             }
+
+
+            // /**
+            //  * Route Theme Demo
+            //  */
+            // {
+            //     path: "/auth/logged/theme-demo",
+            //     name: "theme-demo",
+            //     component: themeDemo,
+            // },
+            // {
+            //     path: "/auth/logged/theme-test",
+            //     name: "theme-test",
+            //     component: themeTest,
+            // },
 
         ]
     },
