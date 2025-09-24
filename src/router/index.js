@@ -35,10 +35,6 @@ const routes = [
         redirect: 'survey'
     },
     {
-        path: '/auth',
-        redirect: 'auth/login'
-    },
-    {
         path: '/survey',
         name: 'survey',
         component: survey,
@@ -79,9 +75,6 @@ const routes = [
                 name: "master-data-village-management",
                 component: masterdataVillage,
             },
-
-
-
 
             // /**
             //  * Route Utility
@@ -131,21 +124,6 @@ const routes = [
                 name: "survey-data-management",
                 component: surveyData,
             }
-
-
-            // /**
-            //  * Route Theme Demo
-            //  */
-            // {
-            //     path: "/auth/logged/theme-demo",
-            //     name: "theme-demo",
-            //     component: themeDemo,
-            // },
-            // {
-            //     path: "/auth/logged/theme-test",
-            //     name: "theme-test",
-            //     component: themeTest,
-            // },
 
         ]
     },
