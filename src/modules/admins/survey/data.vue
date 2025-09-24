@@ -23,7 +23,7 @@
                     class="bg-yellow-500 text-red-700"
                   >
                 </td>
-                <td class="px-4 py-2 border border-gray-300 ">{{ "TOTLE" }}</td>
+                <td class="px-4 py-2 border border-gray-300 ">{{ item.survey_topic }}</td>
                 <td class="px-4 py-2 border border-gray-300 ">
                   <div>
                     {{ item.surveyor_name }}
@@ -53,38 +53,17 @@
                   <UDropdownOpsi>
                     <template v-slot:menu>
                       <div
-                        v-if="page.actions.edit"
                         class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
                       >
                         <button
                           class="flex justify-center items-center"
-                          @click="showCategoryPage(item.uuid)"
+                          
                         >
-                          <i class="ri-puzzle-line text-lg text-green-500 mr-1"></i><span class="text-gray-700">Atur Kategori</span>
+                          <i class="ri-checkbox-line text-lg text-green-500 mr-1"></i><span class="text-gray-700">Verifikasi</span>
                         </button>
                       </div>
-                      <div
-                        v-if="page.actions.edit"
-                        class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                      >
-                        <button
-                          class="flex justify-center items-center"
-                          @click="showDocumentPage(item.uuid)"
-                        >
-                          <i class="ri-attachment-fill text-lg text-blue-500 mr-1"></i><span class="text-gray-700">Dokumen Persyaratan</span>
-                        </button>
-                      </div>
-                      <div
-                        v-if="page.actions.edit"
-                        class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                      >
-                        <button
-                          class="flex justify-center items-center"
-                          @click="showRecord(item.uuid)"
-                        >
-                          <i class="ri-article-line text-lg text-purple-500 mr-1"></i><span class="text-gray-700">Template Formulir Survey</span>
-                        </button>
-                      </div>
+                      
+                      
                       <div
                         v-if="page.actions.edit"
                         class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
@@ -270,7 +249,7 @@
         { title: "#", key: "ids", align: "center", width: "45px" },
         { title: "Topik Survey", key: "name", align: "start", width: "300px" },
         { title: "Surveyor", key: "name", align: "center",width: "150px" },
-        { title: "Lokasi", key: "name", align: "center",width: "150px" },
+        { title: "Lokasi", key: "name", align: "center",width: "300px" },
         { title: "Status", key: "status", align: "center", width: "150px" },
         {
           title: "Aksi",
@@ -497,8 +476,8 @@
           ],
           actions: {
             refresh: true,
-            add: true,
-            edit: true,
+            add: false,
+            edit: false,
             delete: true,
             bulkdelete: false,
             export: false,

@@ -153,7 +153,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Esitmasi Penggunaan Per hari <span class="text-red-500">*</span></label>
             <UTextField
-              v-model="formData.meta[0].usage_per_day"
+              v-model="formData.meta[0].estimate_user_per_day"
               placeholder="Masukkan estimasi penggunaan layanan ini per hari (orang)"
               :error="errors.usage_per_day"
               type="number"

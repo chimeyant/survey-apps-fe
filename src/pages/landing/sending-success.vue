@@ -373,6 +373,7 @@ const generateSurveyId = () => {
 }
 
 onMounted(() => {
+    window.scrollTo(0, 0)
   surveyId.value = route.params.id || route.query.id || generateSurveyId()
 })
 </script>
