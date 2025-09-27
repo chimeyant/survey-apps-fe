@@ -6,6 +6,7 @@
     }"
     :style="{
       backgroundColor: `rgba(0,0,0,0.5)`,
+      zIndex: 9999
     }"
     class="fixed inset-0 flex items-center justify-center animate-fadeIn"
   >
@@ -111,10 +112,12 @@ export default {
           left: `${position.value.x}px`,
           top: `${position.value.y}px`,
           transform: 'none',
-          zIndex: 1000
+          zIndex: 10000
         };
       }
-      return {};
+      return {
+        zIndex: 10000
+      };
     });
 
     const startDrag = (e) => {

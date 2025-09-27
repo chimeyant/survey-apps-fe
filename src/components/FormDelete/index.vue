@@ -4,9 +4,10 @@
     id="dialog"
     :class="form.delete ? ``:`hidden`"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center animate-fadeIn"
+    style="z-index: 99999;"
   >
     <!-- Dialog Box -->
-    <div class="bg-white rounded-lg shadow-lg max-w-md w-full  overflow-hidden">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full  overflow-hidden" style="z-index: 100000;">
       <!-- Header -->
       <div class="flex justify-between items-center mb-2 h-[48px] bg-red-700 px-4 border-b-red-900 border-b-4 animation">
         <h3 class="text-smfont-semibold text-white animate-pulse">Konfirmasi Penghapusan Data</h3>

@@ -12,17 +12,119 @@
             <!-- Survey Form -->
             <div class="bg-white rounded-lg shadow-xl p-8 min-h-[70vh]">
                 <div class="grid grid-cols-12 md:grid-cols-12 gap-4">
-                    <div class="col-span-6 md:col-span-6">
-                        <UComboBox
-                            :items="surveyTopics"
-                            placeholder="Pilih topik survey"
-                        />
-                    </div>
-                    <div class="col-span-6 md:col-span-6">
-                        <UComboBox
-                            v-model="record.question_text"
-                            :items="surveyTopicCategories"
-                            placeholder="Pilih kategori lokasi"
+                    <template v-for="item in records" :key="item.id">
+                        <div class="col-span-11">
+                            <div :class="item.width">
+                                <UTextField
+                                    v-if="item.question_type === 'text'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :required="item.required"
+                                />
+                                <UTextArea
+                                    v-else-if="item.question_type === 'textarea'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :required="item.required"
+                                />
+                                <UComboBox
+                                    v-else-if="item.question_type === 'select'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :items="item.options || []"
+                                    :required="item.required"
+                                />
+                                
+                                <URadioGroup
+                                    v-else-if="item.question_type === 'radio'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :options="item.options || []"
+                                    :required="item.required"
+                                />
+                                <UCheckboxGroup
+                                    v-else-if="item.question_type === 'checkbox'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :options="item.options || []"
+                                    :required="item.required"
+                                />
+                                <UTextField
+                                    v-else-if="item.question_type === 'number'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    type="number"
+                                    :required="item.required"
+                                />
+                                <UTextField
+                                    v-else-if="item.question_type === 'date'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    type="date"
+                                    :required="item.required"
+                                />
+                                <UTextField
+                                    v-else-if="item.question_type === 'time'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    type="time"
+                                    :required="item.required"
+                                />
+                                <UFileUpload
+                                    v-else-if="item.question_type === 'file'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :required="item.required"
+                                    folder="documents"
+                                />
+                                <USwitch
+                                    v-else-if="item.question_type === 'switch'"
+                                    v-model="questions[item.id]"
+                                    :label="item.question_text"
+                                    :required="item.required"
+                                />
+                                
+                                
+                                <div v-else-if="item.question_type === 'location'">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                    {{ item.question_text }} <span v-if="item.required"  class="text-red-500">*</span>
+                                    </label>
+                                    <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                    <UMapCoordinatePicker
+                                        v-model="coordinates"
+                                        @update:modelValue="onLocationChange"
+                                        :initial-location="initialLocation"
+                                        
+                                    />
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-2">
+                                    💡 Klik di peta atau gunakan tombol "Lokasi Saat Ini" untuk mendapatkan koordinat GPS
+                                    </p>
+                                </div>
+                                
+                                <!-- Add more component types as needed -->
+                                <div v-else>
+                                    <span class="text-red-500">Unknown question type: {{ item.question_type }}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="flex flex-row justify-end items-end align-middle py-1 gap-x-1">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-sm text-sm border-l-red-800 border-l-4" @click="postConfirmDelete(item.id)">
+                                <i class="ri-delete-bin-fill text-xs"></i>
+                            </button>
+                            <button v-if="false" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-sm text-sm border-l-blue-800 border-l-4" @click="">
+                                <i class="ri-edit-line text-xs"></i>
+                            </button>
+                            <button v-if="item.question_type == 'select'" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-sm text-sm border-l-green-800 border-l-4" @click="addOption">
+                                <i class="ri-add-line text-xs"></i>
+                            </button>
+                        </div>
+                    </template>
+                    <div class="col-span-12">
+                        <UButton
+                            label="Kirim Survey"
+                            @click="sendSurvey"
                         />
                     </div>
 
@@ -46,6 +148,7 @@
                     label="Nomor Pertanyaan"
                     placeholder="Masukkan nomor pertanyaan"
                     required
+                    type="number"
                 />
             </div>
             <div class="mb-4">
@@ -74,14 +177,6 @@
                 />
             </div>
             <div class="mb-4">
-                <UComboBox
-                    v-model="record.sort_order"
-                    :items="sort_orders"
-                    label="Urutan Pertanyaan"
-                    placeholder="Pilih urutan pertanyaan"
-                />
-            </div>
-            <div class="mb-4">
                 <USwitch
                     v-model="record.required"
                     label="Wajib Diisi"
@@ -89,8 +184,6 @@
                 />
             </div>
           </div> 
-          
-          
         </template>
       </UFormDialog>
             <!-- Floating Add Buttons -->
@@ -111,13 +204,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Form Delete -->
+    <UFormDelete @delete="postDelete" />
 </template>
 
 <script>
 import { useAppStore } from "@/store/app";
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, reactive } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { UButton,UComboBox, UFormDialog,UTextField,UTextArea,USwitch } from "@/components";
+import { UButton,UComboBox, UFormDialog,UTextField,UTextArea,USwitch, UFileUpload,UMapCoordinatePicker,UFormDelete } from "@/components";
 export default {
 
     components: {
@@ -127,6 +223,9 @@ export default {
         UTextField,
         UTextArea,
         USwitch,
+        UFileUpload,
+        UMapCoordinatePicker,
+        UFormDelete,
     },
     setup() {
         const store = useAppStore();
@@ -143,8 +242,10 @@ export default {
         const rules = computed(() => store.rules);
         const record = computed(() => store.record);
         const records = computed(() => store.records);
+        const question = ref({});
+        const questions = ref([]);
 
-        const endpoint = "api/v1/survey/survey-topic-questions/" + route.params.surveyTopicUuid;
+        const endpoint = "api/v1/survey/survey-topic-questions/" + route.params.survey_topic_id;
 
         const question_types = ref([
             {
@@ -156,93 +257,100 @@ export default {
                 label: "Textarea",
             },
             {
+                value: "select",
+                label: "Select Option",
+            },
+            {
                 value: "radio",
-                label: "Radio",
+                label: "Radio Option",
             },
             {
                 value: "checkbox",
-                label: "Checkbox",
+                label: "Checkbox Option",
             },
             {
-                value: "dropdown",
-                label: "Dropdown",
+                value: "switch",
+                label: "Swicth Option",
+            },
+            {
+                value: "file",
+                label: "File Upload",
+            },
+            {
+                value: "image",
+                label: "Image Upload",
+            },
+            {
+                value: "video",
+                label: "Video Upload",
+            },
+            {
+                value: "audio",
+                label: "Audio Upload",
             },
             {
                 value: "number",
                 label: "Number",
             },
             {
-                value: "date",
-                label: "Date",
-            },
-            {
-                value: "time",
-                label: "Time",
-            },
-            {
-                value:"fileupload",
-                label: "File Upload",
-            },
-            {
-                value: "photoupload",
-                label: "Photo Upload",
-            },
-            {
-                value: "mapcoordinate",
-                label: "Map Coordinate | Location",
-            },           
+                value: "location",
+                label: "Location",
+            }
+                       
         ]);
 
         const widths= ref([
             {
-                value: "cols-1",
-                label: "1 Column",
+                value: "col-span-12",
+                label: "12 Column",
             },
             {
-                value: "cols-2",
-                label: "2 Column",
-            },
-            {
-                value: "cols-3",
-                label: "3 Column",
-            },
-            {
-                value: "cols-4",
-                label: "4 Column",
-            },
-            {
-                value: "cols-5",
-                label: "5 Column",
-            },
-            {
-                value: "cols-6",
-                label: "6 Column",
-            },
-            {
-                value: "cols-7",
-                label: "7 Column",
-            },
-            {
-                value: "cols-8",
-                label: "8 Column",
-            },
-            {
-                value: "cols-9",
-                label: "9 Column",
-            },
-            {
-                value: "cols-10",
-                label: "10 Column",
-            },
-            {
-                value: "cols-11",
+                value: "col-span-11",
                 label: "11 Column",
             },
             {
-                value: "cols-12",
-                label: "12 Column",
+                value: "col-span-10",
+                label: "10 Column",
+            },
+            {
+                value: "col-span-9",
+                label: "9 Column",
+            },
+            {
+                value: "col-span-8",
+                label: "8 Column",
+            },
+            {
+                value: "col-span-7",
+                label: "7 Column",
+            },
+            {
+                value: "col-span-6",
+                label: "6 Column",
+            },
+            {
+                value: "col-span-5",
+                label: "5 Column",
+            },
+            {
+                value: "col-span-4",
+                label: "4 Column",
+            },
+            {
+                value: "col-span-3",
+                label: "3 Column",
+            },
+            {
+                value: "col-span-2",
+                label: "2 Column",
+            },
+            {
+                value: "col-span-1",
+                label: "1 Column",
             }
         ])
+
+        
 
         const options =ref([])
 
@@ -257,13 +365,29 @@ export default {
             },
         ])
 
+        const coordinates = reactive({
+            latitude: null,
+            longitude: null,
+        });
+
+        // Initial location (Tangerang coordinates)
+        const initialLocation = ref({
+            lat: -6.1783,
+            lng: 106.6319
+        });
+
+        const onLocationChange = (location) => {
+            coordinates.latitude = location.latitude
+            coordinates.longitude = location.longitude
+        }
+
         const addNew = () => {
             store.setRecord({});
             store.setForm({
-            add: true,
-            edit: false,
-        });
-      };
+                add: true,
+                edit: false,
+            });
+        };
 
         const closeForm = () => {
             store.setForm({
@@ -275,21 +399,70 @@ export default {
        onBeforeUnmount(() => {
             closeForm();
        });
+       
+       const fetchRecords = async () => {
+            const result = await store.fetchRecords(endpoint, {}, true);
+            store.setRecords(result?.data.data ? result.data.data : []);
+            table.value.totalItems = result?.data.meta.total;
+       };
 
         const postRecord = async () => {
-            console.log(record.value);
+            record.value.question_number = parseInt(record.value.question_number);
             const result = await store.postRecord(endpoint, record.value, "store", true);
             
-            store.setRecord(result.data);
+            if (result?.data.status) {
+                store.setSnackbar(
+                    result.data.message,
+                    colors.value.SUCCESS,
+                    types.value.SUCCESS
+                );
+                
+                store.setForm({
+                    add: false,
+                    edit: false,
+                });
+                
+                fetchRecords()
+            }
+        };
+
+        const postConfirmDelete = async (id) => {
             store.setForm({
                 add: false,
                 edit: false,
+                delete: true,
             });
-            records.value.push(result.data.data);
+            question.value.id = id;
+        };
+
+        const postDelete = async () => {
+            const result = await store.postRecord(endpoint + "/" + question.value.id,{},"delete",true);
+            if (result?.data.status) {
+                store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+                store.setForm({
+                    add: false,
+                    edit: false,
+                    delete: false,
+                });
+                store.removeRecord(result.data.data.id);
+                store.setRecord({});
+                fetchRecords();
+            }
+        };
+
+        const addOption = async () => {
+            options.value.push({
+                value: "",
+                label: "",
+            });
+        };
+
+        const sendSurvey = async () => {
+            console.log(questions.value);
         };
 
         
-
+        
         onMounted(() => {
             store.setPage({
                 title: "Manajemen Pertanyaan Survey",
@@ -310,6 +483,21 @@ export default {
                 ],
                 showtable: false,
             });
+
+            fetchRecords()
+
+            // Try to get current location for initial map position
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    initialLocation.lat = position.coords.latitude
+                    initialLocation.lng = position.coords.longitude
+                },
+                (error) => {
+                    console.log('Could not get current location, using default')
+                }
+                )
+            }
         });
 
         
@@ -332,6 +520,14 @@ export default {
             sort_orders,
             options,
             postRecord,
+            sendSurvey,
+            question,
+            questions,
+            coordinates,
+            initialLocation,
+            onLocationChange,
+            postConfirmDelete,
+            postDelete,
 
         };
     },

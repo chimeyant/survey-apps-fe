@@ -319,10 +319,8 @@ const onTopicChange = (value) => {
 }
 
 const onLocationChange = (location) => {
-  
   coordinates.latitude = location.latitude
   coordinates.longitude = location.longitude
-
 }
 
 const onProvinceChange = (value) => {
@@ -426,9 +424,6 @@ const submitSurvey = async () => {
       latitude: coordinates.latitude,
       longitude: coordinates.longitude
     }
-
-    console.log(coordinates)
-
 
     const response = await store.postRecord('/api/v1/survey/send', submissionData, 'store', true)
     if (response.status) {
