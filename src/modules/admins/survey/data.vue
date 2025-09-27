@@ -459,7 +459,8 @@
       const showCategoryPage = (payload) => {
         router.push({ name: "survey-topic-category-management", params: { survey_topic_id: payload } });
       };
-  
+
+      
       onMounted(() => {
         store.setPage({
           title: "Manjemen Survey",

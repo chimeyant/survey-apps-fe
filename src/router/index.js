@@ -21,6 +21,8 @@ import surveyTopic from "@/pages/admin/survey/topic-page.vue"
 import surveyTopicDocument from "@/pages/admin/survey/topic-document-page.vue"
 import surveyTopicCategory from "@/pages/admin/survey/topic-category-page.vue"
 import surveyData from "@/pages/admin/survey/data-pages.vue"
+import surveyTopicQuestion from "@/pages/admin/survey/topic-question-page.vue"
+
 import survey from "@/pages/landing/survey-page.vue"
 import sendingSuccess from "@/pages/landing/sending-success.vue"
 
@@ -113,6 +115,11 @@ const routes = [
                 path: "/auth/logged/survey/topic-document-management/:survey_topic_id",
                 name: "survey-topic-document-management",
                 component: surveyTopicDocument,
+            },
+            {
+                path: "/auth/logged/survey/topic-question-management/:survey_topic_id",
+                name: "survey-topic-question-management",
+                component: surveyTopicQuestion,
             },
             {
                 path: "/auth/logged/survey/topic-category-management/:survey_topic_id",

@@ -76,7 +76,7 @@
                       >
                         <button
                           class="flex justify-center items-center"
-                          @click="showRecord(item.uuid)"
+                          @click="showTopicQuestionPage(item.uuid)"
                         >
                           <i class="ri-article-line text-lg text-purple-500 mr-1"></i><span class="text-gray-700">Template Formulir Survey</span>
                         </button>
@@ -477,6 +477,10 @@
       const showCategoryPage = (payload) => {
         router.push({ name: "survey-topic-category-management", params: { survey_topic_id: payload } });
       };
+
+      const showTopicQuestionPage = (payload) => {
+        router.push({ name: "survey-topic-question-management", params: { survey_topic_id: payload } });
+      };
   
       onMounted(() => {
         store.setPage({
@@ -539,6 +543,7 @@
         selectedOption,
         showDocumentPage,
         showCategoryPage,
+        showTopicQuestionPage,
       };
     },
   };
