@@ -54,6 +54,22 @@
             />
           </div>
 
+          <!-- Postal Code and Phone -->
+          
+            
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Nomor Telepon Surveyor <span class="text-red-500">*</span>
+              </label>
+              <UPhoneInput
+                v-model="formData.phone"
+                placeholder="Masukkan nomor telepon"
+                :error="errors.phone"
+              />
+            </div>
+          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
             <UTextField
@@ -107,30 +123,7 @@
             />
           </div>
 
-          <!-- Postal Code and Phone -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Kode Pos
-              </label>
-              <UTextField
-                v-model="formData.postal_code"
-                placeholder="Masukkan kode pos"
-                :error="errors.postal_code"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Nomor Telepon <span class="text-red-500">*</span>
-              </label>
-              <UPhoneInput
-                v-model="formData.phone"
-                placeholder="Masukkan nomor telepon"
-                :error="errors.phone"
-              />
-            </div>
-          </div>
+          
 
           <!-- Coordinate Picker with Map -->
           <div>
@@ -159,10 +152,45 @@
               type="number"
             />
           </div>
+
+          <div>
+            <div class="text-sm text-gray-800 mt-2 py-2">PIC Perangkat</div>
+            <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <UTextField
+                  v-model="formData.meta[0].pic_perangkatname"
+                  placeholder="Masukkan nama"
+                  :error="errors.pic_name"
+                />
+                
+                <UPhoneInput
+                  v-model="formData.meta[0].pic_perangkat_phone"
+                  placeholder="Masukkan nomor telepon"
+                  :error="errors.pic_phone"
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-800 mt-2 py-2">PIC Gangguan</div>
+            <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <UTextField
+                  v-model="formData.meta[0].pic_gangguan_name"
+                  placeholder="Masukkan nama"
+                  :error="errors.pic_name"
+                />
+                <UPhoneInput
+                  v-model="formData.meta[0].pic_gangguan_phone"
+                  placeholder="Masukkan nomor telepon"
+                  :error="errors.pic_phone"
+                />
+              </div>
+            </div>
+          </div>
           <div class="text-sm text-gray-500 mt-2">
             Dokumen Pendukung Lainnya
           </div>
-
           <div v-for="document in formData.attachments" :key="document.id">
             <label class="block text-sm font-medium text-gray-700 mb-2">{{ document.name }}</label>
             <UFileUpload
