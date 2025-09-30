@@ -11,63 +11,37 @@
         />
       </div>
     </div>
-    <!-- Card Area
+    Card Area
     <div class="grid grid-cols-12 gap-2 mt-10">
-      <div class="col-span-12 lg:col-span-3">
-        <card-one />
+      <div class="col-span-12 lg:col-span-6">
+        <card-one icon="ri-megaphone-line" title="Total Survey" :value="dashboard.totalSurvey" />
       </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-one />
+      <div class="col-span-12 lg:col-span-6">
+        <card-one title="Total Responden" :value="dashboard.totalResponden" />
       </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-one />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-one />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-two />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-two />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-two />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-two />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-three />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-three />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-three />
-      </div>
-      <div class="col-span-12 lg:col-span-3">
-        <card-three />
-      </div>
+     
 
-    </div> -->
+    </div>
 
     <div class="grid grid-cols-12 gap-2 mt-10">
       <!-- Char Area -->
-      <div class="col-span-12 lg:col-span-8">
+      <div v-if="false" class="col-span-12 lg:col-span-8">
         <bar-chart />
       </div>
-      <div class="col-span-12 lg:col-span-4">
+      <div v-if="false" class="col-span-12 lg:col-span-4">
         <pie-chart />
       </div>
-      <div class="col-span-12 lg:col-span-6">
+      <div v-if="false" class="col-span-12 lg:col-span-6">
         <area-chart />
       </div>
-      <div class="col-span-12 lg:col-span-6">
+      <div v-if="false" class="col-span-12 lg:col-span-6">
         <card-four />
       </div>
       <div class="col-span-12">
-        <u-map />
+        <div class="flex justify-between py-5">
+          <h3 class="font-bold text-gray-600">Peta Sebaran Responden</h3>
+        </div>
+        <u-map :markers="markers"   />
       </div>
     </div>
   </div>
@@ -110,6 +84,85 @@ export default {
         value: 2025,
       },
     ]);
+    const map = ref(0);
+    const dashboard = ref({
+      totalSurvey: 0,
+      totalResponden: 0,
+    });
+    const markerIcon = ref("/images/marker-icon.png");
+    const defaultMarker = ref({
+      latLng: [-6.1725, 106.6267],
+      title: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+      popup: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+      icon: markerIcon.value,
+    });
+    const markers = ref([])
+
+    const fetchDashboard = async () => {
+      const result = await store.showRecord("api/v1/survey/dashboard",true)
+
+      dashboard.value.totalSurvey = result.total_survey;
+      dashboard.value.totalResponden = result.total_responden;
+    };
+
+    const fetchSebaranResponden = async () => {
+      map.value++;
+      try {
+        const result = await store.fetchRecords("api/v1/survey/dashboard/sebaran-responden",{},true)
+        
+        if (result.data && result.data.data && Array.isArray(result.data.data)) {
+          markers.value = result.data.data.map(item => ({
+            latLng: [Number(item.latitude), Number(item.longitude)],
+            title: item.survey_name || 'Survey Location',
+            popup: `<div>
+              <div>
+                <div class="font-bold">${item.survey_name}</div>
+                <div class="text-gray-500">${item.address}</div>
+                <div class="text-gray-500">${item.surveyor_name}</div>
+                <div>Lampiran</div>
+              </div>
+              <div class="flex flex-col gap-2 mt-2">
+                <!-- Tiga card kecil di bawah -->
+                <div class="flex justify-between gap-2">
+                  <div class="w-1/3 bg-white rounded shadow p-2 flex flex-col items-center">
+                    <div class="w-full h-20 flex items-center justify-center bg-gray-100 rounded">
+                      <img src="/images/sample-image-2.jpg" alt="Lampiran 2" class="object-contain h-16" />
+                    </div>
+                    <div class="text-xs text-center mt-1">Lampiran 2</div>
+                  </div>
+                  <div class="w-1/3 bg-white rounded shadow p-2 flex flex-col items-center">
+                    <div class="w-full h-20 flex items-center justify-center bg-gray-100 rounded">
+                      <a href="/files/sample-file.pdf" target="_blank" class="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="text-xs mt-1">File PDF</span>
+                      </a>
+                    </div>
+                    <div class="text-xs text-center mt-1">Lampiran 3</div>
+                  </div>
+                  <div class="w-1/3 bg-white rounded shadow p-2 flex flex-col items-center">
+                    <div class="w-full h-20 flex items-center justify-center bg-gray-100 rounded">
+                      <img src="/images/sample-image-1.jpg" alt="Lampiran 4" class="object-contain h-16" />
+                    </div>
+                    <div class="text-xs text-center mt-1">Lampiran 4</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>`,
+            icon: markerIcon.value,
+          }));
+        } else {
+          markers.value = [];
+        }
+        
+        map.value++;
+      } catch (error) {
+        console.error('Error fetching sebaran responden:', error);
+        markers.value = [];
+      }
+    };
 
     onMounted(() => {
       store.setPage({
@@ -135,10 +188,18 @@ export default {
         },
         showtable: false,
       });
+
+      fetchDashboard();
+      fetchSebaranResponden();
+
     });
 
     return {
       tahuns,
+      dashboard,
+      markers,
+      defaultMarker,
+      map
     };
   },
 };
