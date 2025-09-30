@@ -9,6 +9,8 @@
           `bg-${themeColors.primary}-700`,
           minimised ? 'w-[70px]' : 'w-[300px]'
         ]"
+        @mouseenter="handleSidebarHover"
+        @mouseleave="handleSidebarLeave"
       >
         <!-- Sidebar Header -->
         <div class="h-[220px] flex flex-col justify-between"
@@ -102,26 +104,37 @@
                   v-if="menu.props.type =='item'"
                   @click="router.push({name: menu.props.route})"
                   :class="[
-                    'flex items-center w-full rounded-full text-left transition-all duration-500 focus:outline-none',
+                    'flex items-center w-full rounded-full text-left transition-all duration-500 focus:outline-none relative',
                     minimised ? 'justify-center px-0 py-2' : 'px-4 py-2',
                     `hover:bg-${themeColors.primary}-100`,
                     `hover:text-${themeColors.primary}-700`
                   ]"
+                  :title="minimised ? menu.title : ''"
                 >
                   <i :class="menu.props.icon + ' text-lg ' + (minimised ? '' : 'mr-2')"></i>
                   <span v-if="!minimised" class="text-sm">{{ menu.title }}</span>
+                  
+                  <!-- Tooltip for minimised state -->
+                  <div 
+                    v-if="minimised && !isHoveringToExpand"
+                    class="tooltip-menu"
+                  >
+                    {{ menu.title }}
+                  </div>
                 </button>
 
                 <!-- Main Menu Items (Group) -->
-                <div v-if="menu.props.type =='group'">
+                <div v-if="menu.props.type =='group'" class="relative group-menu">
                   <button
                     @click="toggleMenu(index)"
+                    @mouseenter="handleMenuHover(index)"
                     :class="[
-                      'flex items-center w-full rounded-full text-left transition-all duration-500 focus:outline-none',
+                      'flex items-center w-full rounded-full text-left transition-all duration-500 focus:outline-none relative',
                       minimised ? 'justify-center px-0 py-2' : 'px-4 py-2',
                       `hover:bg-${themeColors.primary}-100`,
                       `hover:text-${themeColors.primary}-700`
                     ]"
+                    :title="minimised ? menu.title : ''"
                   >
                     <i :class="menu.props.icon + ' text-lg ' + (minimised ? '' : 'mr-2')"></i>
                     <span v-if="!minimised" class="text-sm">{{ menu.title }}</span>
@@ -141,8 +154,17 @@
                         d="M19 9l-7 7-7-7"
                       ></path>
                     </svg>
+                    
+                    <!-- Tooltip for minimised state -->
+                    <div 
+                      v-if="minimised && !isHoveringToExpand"
+                      class="tooltip-menu"
+                    >
+                      {{ menu.title }}
+                    </div>
                   </button>
-                  <!-- Submenu -->
+                  
+                  <!-- Submenu (inline when expanded) -->
                   <transition name="submenu">
                     <ul
                       v-if="menu.props.submenus && openMenuIndex === index && !minimised"
@@ -162,6 +184,30 @@
                       </li>
                     </ul>
                   </transition>
+                  
+                  <!-- Dropdown Submenu (when minimised) -->
+                  <div 
+                    v-if="minimised && menu.props.submenus && hoveredMenuIndex === index"
+                    class="dropdown-submenu"
+                    @mouseenter="keepDropdownOpen(index)"
+                    @mouseleave="closeDropdown"
+                  >
+                    <div class="dropdown-title">{{ menu.title }}</div>
+                    <ul class="space-y-1">
+                      <li
+                        v-for="(submenus, subIndex) in menu.props.submenus"
+                        :key="subIndex"
+                        class="py-2 px-4 text-sm rounded-lg duration-200 transition-all hover:cursor-pointer"
+                        :class="[
+                          `hover:bg-${themeColors.primary}-100`,
+                          `hover:text-${themeColors.primary}-700`
+                        ]"
+                        @click="router.push({ name: submenus.props.route})"
+                      >
+                        <i class="ri-checkbox-blank-circle-fill mr-2 text-[7pt]"></i> {{ submenus.title }}
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </li>
             </ul>
@@ -340,8 +386,13 @@ export default {
     const showDropDown = ref(false);
     const showSide = ref(true);
     const minimised = ref(false);
+    const isMinimisedByUser = ref(false);
+    const isHoveringToExpand = ref(false);
+    const hoveredMenuIndex = ref(null);
     const time = ref(new Date().toLocaleTimeString());
     let timer = null;
+    let hoverTimer = null;
+    let dropdownTimer = null;
 
     const fetchUserInfo = () => {
       store.getUserInfo().then(()=>{
@@ -361,8 +412,69 @@ export default {
 
     const toggleMinimised = () => {
       minimised.value = !minimised.value;
+      isMinimisedByUser.value = minimised.value;
+      isHoveringToExpand.value = false;
       // close open menu if minimised
       if (minimised.value) openMenuIndex.value = null;
+    };
+
+    const handleSidebarHover = () => {
+      if (isMinimisedByUser.value && !minimised.value) {
+        return; // Already expanded
+      }
+      
+      if (isMinimisedByUser.value) {
+        // Delay expansion to avoid accidental triggers
+        hoverTimer = setTimeout(() => {
+          minimised.value = false;
+          isHoveringToExpand.value = true;
+        }, 500);
+      }
+    };
+
+    const handleSidebarLeave = () => {
+      // Clear the hover timer if mouse leaves before expansion
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
+      
+      // Close dropdown when leaving sidebar
+      hoveredMenuIndex.value = null;
+      
+      // Collapse sidebar if it was expanded by hover
+      if (isMinimisedByUser.value && isHoveringToExpand.value) {
+        minimised.value = true;
+        isHoveringToExpand.value = false;
+        openMenuIndex.value = null;
+      }
+    };
+
+    const handleMenuHover = (index) => {
+      if (minimised.value && !isHoveringToExpand.value) {
+        // Clear any existing timer
+        if (dropdownTimer) {
+          clearTimeout(dropdownTimer);
+        }
+        // Show dropdown after a short delay
+        dropdownTimer = setTimeout(() => {
+          hoveredMenuIndex.value = index;
+        }, 200);
+      }
+    };
+
+    const keepDropdownOpen = (index) => {
+      hoveredMenuIndex.value = index;
+    };
+
+    const closeDropdown = () => {
+      if (dropdownTimer) {
+        clearTimeout(dropdownTimer);
+        dropdownTimer = null;
+      }
+      setTimeout(() => {
+        hoveredMenuIndex.value = null;
+      }, 100);
     };
 
     const toggleDropDown = () => {
@@ -412,6 +524,12 @@ export default {
 
     onBeforeUnmount(() => {
       clearInterval(timer);
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+      }
+      if (dropdownTimer) {
+        clearTimeout(dropdownTimer);
+      }
     });
 
     return {
@@ -436,6 +554,13 @@ export default {
       toggleMinimised,
       themeColors,
       changePassword,
+      handleSidebarHover,
+      handleSidebarLeave,
+      isHoveringToExpand,
+      hoveredMenuIndex,
+      handleMenuHover,
+      keepDropdownOpen,
+      closeDropdown,
     };
   },
 };
@@ -463,5 +588,84 @@ export default {
 .submenu-enter-to, .submenu-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Tooltip styling */
+.tooltip-menu {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Arrow for tooltip */
+.tooltip-menu::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Show tooltip on hover */
+button:hover .tooltip-menu {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.3s;
+}
+
+/* Dropdown Submenu styling */
+.dropdown-submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 12px;
+  margin-left: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  animation: slideInRight 0.2s ease-out;
+}
+
+.dropdown-title {
+  font-weight: bold;
+  font-size: 13px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Prevent tooltip from showing when dropdown is active */
+.group-menu:hover .tooltip-menu {
+  display: none;
 }
 </style>
