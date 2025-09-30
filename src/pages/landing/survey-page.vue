@@ -201,11 +201,8 @@
               :error="errors.attachments"
               @change="(values)=>addOtherDocument(values, document)"
             />
-
           </div>
-
-           
-
+          
           <!-- Submit Button -->
           <div class="flex justify-center pt-6">
             <UButton
