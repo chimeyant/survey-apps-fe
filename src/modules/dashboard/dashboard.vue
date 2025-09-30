@@ -11,7 +11,6 @@
         />
       </div>
     </div>
-    Card Area
     <div class="grid grid-cols-12 gap-2 mt-10">
       <div class="col-span-12 lg:col-span-6">
         <card-one icon="ri-megaphone-line" title="Total Survey" :value="dashboard.totalSurvey" />
