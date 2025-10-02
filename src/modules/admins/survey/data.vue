@@ -550,6 +550,9 @@
           edit: false,
           page: false,
         });
+        store.page({
+          showtable:true
+        })
       };
 
       const showDocument = (document) => {
