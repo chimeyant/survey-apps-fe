@@ -231,7 +231,19 @@
   
       </div>
 
-      
+      <!-- Floating Close Button -->
+      <div
+        v-if="form.page"
+        class="fixed bottom-12 right-6 z-[9999]"
+      >
+        <button
+          @click="closeVerifikasiPage"
+          class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-300"
+          title="Tutup Form"
+        >
+          <i class="ri-close-line text-lg"></i>
+        </button>
+      </div>
       
       <!-- Form Delete -->
       <UFormDelete @delete="postDelete" />
@@ -241,7 +253,7 @@
   <script>
   import { useAppStore } from "@/store/app";
   import { useRouter } from "vue-router";
-  import { computed, onMounted, ref, watch } from "vue";
+  import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
   import {
     UComboBox,
     USwitch,
@@ -543,8 +555,24 @@
       const showDocument = (document) => {
         showFileViewer.value = true;
         documentViewer.value = document;
-
       }
+
+      onBeforeUnmount(() => {
+        showFileViewer.value = false;
+        documentViewer.value = {
+          path: "",
+          file_name: "",
+        };
+        store.setForm({
+          add: false,
+          edit: false,
+          page: false,
+        });
+        store.setPage({
+          showtable: false,
+        });
+        store.setRecord({});
+      });
 
       
       onMounted(() => {

@@ -288,7 +288,7 @@
        */
       const showRecord = async (payload) => {
         const result = await store.showRecord(endpoint + "/" + payload, true);
-        store.setRecord(result.data);
+        store.setRecord(result);
         store.setForm({
           add: true,
           edit: true,
