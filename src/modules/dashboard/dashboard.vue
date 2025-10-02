@@ -16,7 +16,7 @@
         <card-one icon="ri-megaphone-line" title="Total Survey" :value="dashboard.totalSurvey" />
       </div>
       <div class="col-span-12 lg:col-span-6">
-        <card-one title="Total Responden" :value="dashboard.totalResponden" />
+        <card-one icon="ri-group-3-fill" title="Total Responden" :value="dashboard.totalResponden" />
       </div>
      
 
@@ -40,7 +40,7 @@
         <div class="flex justify-between py-5">
           <h3 class="font-bold text-gray-600">Peta Sebaran Responden</h3>
         </div>
-        <u-map :markers="markers"   />
+        <u-map :markers="markers"  :show-layer-control="true" />
       </div>
     </div>
   </div>

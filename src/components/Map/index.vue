@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-[300px]">
-    
+  <div class="min-h-[300px] w-full">
+    <div class="w-full h-[400px] border border-gray-300 rounded-lg overflow-hidden">
       <l-map
         ref="map"
-        style="height: 400px; width: 100%;"
+        style="height: 100%; width: 100%;"
         :zoom="mapZoom"
         :center="mapCenter"
       >
-      <!-- Default OpenStreetMap Layer (always visible) -->
+      <!-- Default OpenStreetMap Layer -->
       <l-tile-layer
         :name="layers.openstreetmap.name"
         :url="layers.openstreetmap.url"
@@ -26,7 +26,7 @@
         layer-type="base"
       />
       
-      <!-- Layer Control -->
+      <!-- Layer Control - Show if there are additional layers -->
       <l-control-layers
         v-if="showLayerControl && additionalLayers.length > 0"
         :position="layerControlPosition"
@@ -63,7 +63,8 @@
           <div v-html="defaultMarker.popup"></div>
         </l-popup>
       </l-marker>
-    </l-map>
+      </l-map>
+    </div>
   </div>
 </template>
   
@@ -151,6 +152,15 @@ export default {
       iconUrl: markerIcon,
       shadowUrl: markerShadow,
     });
+    
+    // Debug logging
+    console.log('Map component mounted');
+    console.log('Available layers:', this.availableLayers);
+    console.log('Additional layers:', this.additionalLayers);
+    console.log('Show layer control:', this.showLayerControl);
+    console.log('Map center:', this.mapCenter);
+    console.log('Map zoom:', this.mapZoom);
+    console.log('Markers:', this.markers);
   },
   props: {
     latitude: {
@@ -200,7 +210,7 @@ export default {
     },
     availableLayers: {
       type: Array,
-      default: () => ['openstreetmap', 'satellite', 'terrain', 'dark', 'watercolor', 'toner'],
+      default: () => ['openstreetmap', 'terrain', 'satellite', 'dark'],
     },
 
     
