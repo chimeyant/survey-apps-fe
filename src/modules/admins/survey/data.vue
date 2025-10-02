@@ -550,7 +550,7 @@
           edit: false,
           page: false,
         });
-        store.page({
+        store.setPage({
           showtable:true
         })
       };
