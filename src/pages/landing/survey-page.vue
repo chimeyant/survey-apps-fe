@@ -4,7 +4,7 @@
       <!-- Header Section -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          Sistem Manajemen Survey Kabupaten Tangerang
+          Sistem Manajemen Survei Kabupaten Tangerang
         </h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
           Bantu kami mengumpulkan data  di wilayah Anda untuk meningkatkan pelayanan di Kabupaten Tangerang
@@ -18,12 +18,12 @@
           <!-- Survey Topic Selection -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Topik Survey <span class="text-red-500">*</span>
+              Topik Survei <span class="text-red-500">*</span>
             </label>
             <UComboBox
               v-model="formData.survey_topic_id"
               :items="surveyTopics"
-              placeholder="Pilih topik survey"
+              placeholder="Pilih topik survei"
               @change="onTopicChange"
               :error="errors.survey_topic_id"
             />
@@ -128,7 +128,7 @@
             </label>
             <UTextArea
               v-model="formData.address"
-              placeholder="Masukkan alamat lengkap lokasi survey"
+              placeholder="Masukkan alamat lengkap lokasi survei"
               :rows="3"
               :error="errors.address"
             />
@@ -204,7 +204,7 @@
               :loading="isSubmitting"
               class="px-12 py-3 text-lg"
             >
-              Kirim Survey
+              Kirim Survei
             </UButton>
           </div>
           
@@ -227,7 +227,7 @@
           </li>
           <li class="flex items-start">
             <span class="text-green-500 mr-2">✓</span>
-            <span>Survey ini bertujuan untuk meningkatkan kualitas data layanan  di wilayah Anda</span>
+            <span>Survei ini bertujuan untuk meningkatkan kualitas data layanan  di wilayah Anda</span>
           </li>
           <li class="flex items-start">
             <span class="text-green-500 mr-2">✓</span>
@@ -239,7 +239,7 @@
       <!-- Tips Section -->
       <div class="mt-8 bg-blue-50 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-blue-900 mb-3">
-          💡 Tips Mengisi Survey
+          💡 Tips Mengisi Survei
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
           <div>
