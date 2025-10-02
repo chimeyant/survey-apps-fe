@@ -134,21 +134,6 @@
               </tr>
             </table>
           </div>
-          <div class="text-sm font-bold text-gray-400 uppercase mb-2 py-5">PIC PERANGKAT</div>
-          <div>
-            <table class="w-full text-gray-500">
-              <tr>
-                <td class="w-48">Nama</td>
-                <td class="w-4 text-center">:</td>
-                <td>{{ record.meta[0]['pic_perangkatname'] }}</td>
-              </tr>
-              <tr>
-                <td class="w-48">No. HP</td>
-                <td class="w-4 text-center">:</td>
-                <td>{{ record.meta[0]['pic_perangkat_phone'] }}</td>
-              </tr>
-            </table>
-          </div>
           <div class="text-sm font-bold text-gray-400 uppercase mb-2 py-5">PIC GANGGUAN</div>
           <div>
             <table class="w-full text-gray-500">

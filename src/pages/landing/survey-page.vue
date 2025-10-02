@@ -164,24 +164,7 @@
             />
           </div>
 
-          <div>
-            <div class="text-sm text-gray-800 mt-2 py-2">PIC Perangkat</div>
-            <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <UTextField
-                  v-model="formData.meta[0].pic_perangkat_name"
-                  placeholder="Masukkan nama"
-                  :error="errors.pic_name"
-                />
-                
-                <UPhoneInput
-                  v-model="formData.meta[0].pic_perangkat_phone"
-                  placeholder="Masukkan nomor telepon"
-                  :error="errors.pic_phone"
-                />
-              </div>
-            </div>
-          </div>
+          
           <div>
             <div class="text-sm text-gray-800 mt-2 py-2">PIC Gangguan</div>
             <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
