@@ -1,194 +1,249 @@
 <template>
     <div class="flex flex-col mt-4 w-full min-h-full animate-fadeIn ">
-      <UFormDataTable
-        title="Daftar Data Survey"
-        @onRefresh="fetchRecords({})"
-        @onAdd="addNew"
-        v-model:keyword="keyWord"
-      >
-        <template v-slot:data-table>
-          <!-- U Data Table -->
-          <UDataTable
-            :headers="headers"
-            @update:options="fetchRecords"
+        <UFormDataTable
+          title="Daftar Data Survey"
+          @onRefresh="fetchRecords({})"
+          @onAdd="addNew"
+          v-model:keyword="keyWord"
+          v-show="!form.page"
           >
-            <template v-slot:body>
-              <tr
-                class="hover:bg-gray-100 text-sm"
-                v-for="item in records"
-              >
-                <td class="px-4 py-2 border border-gray-300">
-                  <input
-                    type="checkbox"
-                    class="bg-yellow-500 text-red-700"
-                  >
-                </td>
-                <td class="px-4 py-2 border border-gray-300 ">{{ item.survey_topic }}</td>
-                <td class="px-4 py-2 border border-gray-300 ">
-                  <div>
-                    {{ item.surveyor_name }}
+          <template v-slot:data-table>
+            <!-- U Data Table -->
+            <UDataTable
+              :headers="headers"
+              @update:options="fetchRecords"
+            >
+              <template v-slot:body>
+                <tr
+                  class="hover:bg-gray-100 text-sm"
+                  v-for="item in records"
+                >
+                  <td class="px-4 py-2 border border-gray-300">
+                    <input
+                      type="checkbox"
+                      class="bg-yellow-500 text-red-700"
+                      name="item.uuid"
+                    >
+                  </td>
+                  <td class="px-4 py-2 border border-gray-300 ">{{ item.survey_topic }}</td>
+                  <td class="px-4 py-2 border border-gray-300 ">
+                    <div>
+                      {{ item.surveyor_name }}
+                      <br>
+                      <span class="text-xs text-gray-500">
+                        {{ item.phone }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-2 border border-gray-300 ">
+                    {{ item.address }}
                     <br>
-                    <span class="text-xs text-gray-500">
-                      {{ item.phone }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-4 py-2 border border-gray-300 ">
-                  {{ item.address }}
-                  <br>
-                  <UChip
-                  class="text-xs"
-                    label="Lihat Peta"
-                    color="info"
-                  />
-                </td>
-                
-                <td class="px-4 py-2 border border-gray-300 text-center">
-                  <UChip
-                    :label="item.status ? 'Aktif' : 'Tidak Aktif'"
-                    :color="item.status ? 'success' : 'error'"
-                  />
-                </td>
-                <td class="px-4 py-2 border border-gray-300 text-center">
-                  <UDropdownOpsi>
-                    <template v-slot:menu>
-                      <div
-                        class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                      >
-                        <button
-                          class="flex justify-center items-center"
-                          
-                        >
-                          <i class="ri-checkbox-line text-lg text-green-500 mr-1"></i><span class="text-gray-700">Verifikasi</span>
-                        </button>
-                      </div>
-                      
-                      
-                      <div
-                        v-if="page.actions.edit"
-                        class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                      >
-                        <button
-                          class="flex justify-center items-center"
+                  </td>
+                  
+                  <td class="px-4 py-2 border border-gray-300 text-center">
+                    <UChip
+                      :label="item.status ? 'Aktif' : 'Tidak Aktif'"
+                      :color="item.status ? 'success' : 'error'"
+                    />
+                  </td>
+                  <td class="px-4 py-2 border border-gray-300 text-center">
+                    <UDropdownOpsi>
+                      <template v-slot:menu>
+                        <div
+                          class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
                           @click="showRecord(item.uuid)"
                         >
-                          <i class="ri-edit-circle-fill text-lg text-orange-500 mr-1"></i><span class="text-gray-700">Ubah Data</span>
-                        </button>
-                      </div>
-                      <div
-                        v-if="page.actions.delete"
-                        class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                      >
-                        <button
-                          class="flex justify-center items-center"
+                          <button
+                            class="flex justify-center items-center"
+                            
+                          >
+                            <i class="ri-checkbox-line text-lg text-green-500 mr-1"></i><span class="text-gray-700">Verifikasi</span>
+                          </button>
+                        </div>
+                        
+                        
+                        <div
+                          v-if="page.actions.edit"
+                          class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
+                          @click="showRecord(item.uuid)"
+                        >
+                          <button
+                            class="flex justify-center items-center"
+                            
+                          >
+                            <i class="ri-edit-circle-fill text-lg text-orange-500 mr-1"></i><span class="text-gray-700">Ubah Data</span>
+                          </button>
+                        </div>
+                        <div
+                          v-if="page.actions.delete"
+                          class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
                           @click="postConfirmDelete(item.uuid)"
                         >
-                          <i class="ri-delete-bin-2-fill text-lg text-red-500 mr-1"></i><span class="text-gray-700">Hapus Data</span>
-                        </button>
-                      </div>
-                    </template>
-                  </UDropdownOpsi>
-                </td>
-              </tr>
-            </template>
-          </UDataTable>
-        </template>
-      </UFormDataTable>
+                          <button
+                            class="flex justify-center items-center"
+                            
+                          >
+                            <i class="ri-delete-bin-2-fill text-lg text-red-500 mr-1"></i><span class="text-gray-700">Hapus Data</span>
+                          </button>
+                        </div>
+                      </template>
+                    </UDropdownOpsi>
+                  </td>
+                </tr>
+              </template>
+            </UDataTable>
+          </template>
+        </UFormDataTable>
   
       <!-- Form Slider -->
       <div
-        v-if="false"
+        v-if="form.page"
         class="flex flex-col h-full w-full animate-fadeIn"
       >
-        <div class="lg:w-full h-[48px] bg-teal-700 rounded-t-md ">
+        <div class="lg:w-full h-[48px] bg-cyan-700 rounded-t-md ">
           <div class="flex justify-between items-center h-full w-full px-5">
             <div class="text-white">
-              Formulir Manajemen Pengguna
+              Formulir Detail | Verifikasi | PIC
             </div>
             <div class="flex gap-x-3">
               <div class="text-white text-2xl">
-                <i class="ri-close-circle-fill"></i>
+                <i class="ri-close-circle-fill" @click="closeVerifikasiPage"></i>
                 <i class="ri-question-fill"></i>
               </div>
             </div>
           </div>
         </div>
-  
-      </div>
-  
-      <!-- Form Dialog -->
-  
-      <UFormDialog
-        title="Formulir Manajemen Topik"
-        @onSave="postRecord"
-        @onUpdate="postUpdate"
-      >
-        <template v-slot:formdata>
-          <!-- Name Field -->
+        <div class="min-h-[74vh] w-full bg-white shadow round-b-md border border-gray-100 shadow p-4 mb-10">
+          <div class="text-sm font-bold text-gray-400 uppercase mb-2">Identitas Surveyor</div>
           <div>
-            <div class="mb-4">
-              <UTextField
-                label="Topik"
-                v-model="record.name"
-                required
-              />
-            </div>
-            <div class="mb-4">
-              <UTextArea
-                label="Penjelasan Singkat"
-                v-model="record.description"
-                required
-              />
-            </div>
-            <div class="grid grid-cols-2 gap-x-1">
-              <div class="mb-4">
-                <UTextField
-                  label="Dari Tanggal"
-                  v-model="record.start_date"
-                  required
-                  type="date"
-                />
+            <table class="w-full text-gray-500">
+              <tr>
+                <td class="w-48">Nama</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.surveyor_name }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Jabatan</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.surveyor_position }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">No. HP</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.phone }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="text-sm font-bold text-gray-400 uppercase mb-2 py-5">PIC PERANGKAT</div>
+          <div>
+            <table class="w-full text-gray-500">
+              <tr>
+                <td class="w-48">Nama</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.meta[0]['pic_perangkatname'] }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">No. HP</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.meta[0]['pic_perangkat_phone'] }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="text-sm font-bold text-gray-400 uppercase mb-2 py-5">PIC GANGGUAN</div>
+          <div>
+            <table class="w-full text-gray-500">
+              <tr>
+                <td class="w-48">Nama</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.meta[0]['pic_gangguan_name'] }}</td>
+              </tr>
+              
+              <tr>
+                <td class="w-48">No. HP</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.meta[0]['pic_gangguan_phone'] }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="text-sm font-bold text-gray-400 uppercase mt-5 mb-2">Hasil Survey</div>
+          <div>
+            <table class="w-full text-gray-500">
+              <tr>
+                <td class="w-48">Kategori</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.category_name }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Nama Lokasi</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.location_name }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Estimasi Pengguna Per Hari</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.estimated_user_per_day }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Kecamatan</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.district_name }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Kelurahan/Desa</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.village_name }}</td>
+              </tr>
+              <tr>
+                <td class="w-48">Alamat</td>
+                <td class="w-4 text-center">:</td>
+                <td>{{ record.address }}</td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-gray-400 uppercase mt-5 mb-2">Lampiran</div>
+            <div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
+                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
+                    <img v-if="record.attachment_1_url" :src="record.attachment_1_url" alt="Attachment 1" class="object-contain h-full w-full" />
+                    <span v-else class="text-gray-400">Tidak ada file</span>
+                  </div>
+                  <div class="font-semibold text-sm mb-1">Lampiran 1</div>
+                  <a v-if="record.attachment_1_url" :href="record.attachment_1_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
+                </div>
+                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
+                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
+                    <img v-if="record.attachment_2_url" :src="record.attachment_2_url" alt="Attachment 2" class="object-contain h-full w-full" />
+                    <span v-else class="text-gray-400">Tidak ada file</span>
+                  </div>
+                  <div class="font-semibold text-sm mb-1">Lampiran 2</div>
+                  <a v-if="record.attachment_2_url" :href="record.attachment_2_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
+                </div>
+                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
+                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
+                    <img v-if="record.attachment_3_url" :src="record.attachment_3_url" alt="Attachment 3" class="object-contain h-full w-full" />
+                    <span v-else class="text-gray-400">Tidak ada file</span>
+                  </div>
+                  <div class="font-semibold text-sm mb-1">Lampiran 3</div>
+                  <a v-if="record.attachment_3_url" :href="record.attachment_3_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
+                </div>
               </div>
-              <div class="mb-4">
-                <UTextField
-                  label="Sampai Tanggal"
-                  v-model="record.end_date"
-                  required
-                  type="date"
-                />
-              </div>
-              <div class="mb-4">
-                <UTextField
-                  label="Jam Mulai"
-                  v-model="record.start_time"
-                  type="time"
-                />
-              </div>
-              <div class="mb-4">
-                <UTextField
-                  label="Jam Selesai"
-                  v-model="record.end_time"
-                  type="time"
-                />
-              </div>
-            </div>
-            <div class="mb-4">
-              <USwitch
-                label="Aktifkan Token"
-                v-model="record.is_token"
-              />
-            </div>
-            
-    
-            <div class="mb-4">
-              <USwitch
-                label="Aktif"
-                v-model="record.status"
-              />
             </div>
           </div>
-        </template>
-      </UFormDialog>
+          <div>
+            <div class="text-sm font-bold text-gray-400 uppercase mt-5 mb-2">MAP LOKASI</div>
+            <UMap
+              :latitude="record.latitude"
+              :longitude="record.longitude"
+              :markers="markers"
+              :showDefaultMarker="false"
+              :defaultMarker="defaultMarker"
+            />
+          </div>
+        </div>
+  
+      </div>
   
       <!-- Form Delete -->
       <UFormDelete @delete="postDelete" />
@@ -210,7 +265,8 @@
     UFileUpload,
     UTextField,
     UTextArea,
-    UChip
+    UChip,
+    UMap,
   } from "@/components";
   import { debounce } from "lodash";
   
@@ -226,7 +282,8 @@
       UFileUpload,
       UTextField,
       UTextArea,
-      UChip
+      UChip,
+      UMap
     },
     setup() {
       const store = useAppStore();
@@ -329,10 +386,11 @@
        */
       const showRecord = async (payload) => {
         const result = await store.showRecord(endpoint + "/" + payload, true);
-        store.setRecord(result.data);
+        store.setRecord(result);
         store.setForm({
-          add: true,
-          edit: true,
+          add: false,
+          edit: false,
+          page:true,
         });
       };
   
@@ -460,6 +518,23 @@
         router.push({ name: "survey-topic-category-management", params: { survey_topic_id: payload } });
       };
 
+      const showVerifikasiPage = async (payload) => {
+        
+        store.setForm({
+          add: false,
+          edit: false,
+          page: true,
+        });
+      };
+
+      const closeVerifikasiPage = () => {
+        store.setForm({
+          add: false,
+          edit: false,
+          page: false,
+        });
+      };
+
       
       onMounted(() => {
         store.setPage({
@@ -522,6 +597,8 @@
         selectedOption,
         showDocumentPage,
         showCategoryPage,
+        showVerifikasiPage,
+        closeVerifikasiPage,
       };
     },
   };

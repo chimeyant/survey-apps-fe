@@ -42,6 +42,15 @@
             />
           </div>
 
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lokasi</label>
+            <UTextField
+              v-model="formData.meta[0].location_name"
+              placeholder="Masukkan nama lokasi"
+              :error="errors.location_name"
+            />
+          </div>
+
           <!-- Surveyor Information -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -81,7 +90,9 @@
 
           <!-- Location Information -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
             <!-- District -->
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Kecamatan <span class="text-red-500">*</span>
@@ -158,7 +169,7 @@
             <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <UTextField
-                  v-model="formData.meta[0].pic_perangkatname"
+                  v-model="formData.meta[0].pic_perangkat_name"
                   placeholder="Masukkan nama"
                   :error="errors.pic_name"
                 />
