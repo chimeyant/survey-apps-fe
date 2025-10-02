@@ -176,12 +176,12 @@
               <tr>
                 <td class="w-48">Nama Lokasi</td>
                 <td class="w-4 text-center">:</td>
-                <td>{{ record.location_name }}</td>
+                <td>{{ record.meta[0]['location_name'] }}</td>
               </tr>
               <tr>
                 <td class="w-48">Estimasi Pengguna Per Hari</td>
                 <td class="w-4 text-center">:</td>
-                <td>{{ record.estimated_user_per_day }}</td>
+                <td>{{ record.meta[0]['estimate_user_per_day'] }}</td>
               </tr>
               <tr>
                 <td class="w-48">Kecamatan</td>
@@ -202,35 +202,36 @@
           </div>
           <div>
             <div class="text-sm font-bold text-gray-400 uppercase mt-5 mb-2">Lampiran</div>
-            <div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
-                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
-                    <img v-if="record.attachment_1_url" :src="record.attachment_1_url" alt="Attachment 1" class="object-contain h-full w-full" />
-                    <span v-else class="text-gray-400">Tidak ada file</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    v-for="(document, index) in record.attachment"
+                    :key="document.uuid"
+                    class="bg-white rounded-lg shadow p-4 flex items-center gap-4 border border-cyan-100"
+                  >
+                    <div class="flex-shrink-0">
+                      <i class="ri-file-3-line text-3xl text-cyan-500"></i>
+                    </div>
+                    <div class="flex-1">
+                      <div class="font-semibold text-gray-700">{{ document.name }}</div>
+                      <div class="text-xs text-gray-400" v-if="document.require">Wajib</div>
+                      <div class="text-xs text-gray-400" v-else>Tidak Wajib</div>
+                    </div>
+                    <div>
+                      <span v-if="document.file_name" @click="showDocument(document)" class="text-cyan-600 hover:underline text-sm flex items-center gap-1 hover:cursor-pointer">Lihat Dokumen</span>
+                      <span v-if="!document.file_name" class="text-gray-400 text-xs">Belum diunggah</span>
+                    </div>
                   </div>
-                  <div class="font-semibold text-sm mb-1">Lampiran 1</div>
-                  <a v-if="record.attachment_1_url" :href="record.attachment_1_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
                 </div>
-                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
-                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
-                    <img v-if="record.attachment_2_url" :src="record.attachment_2_url" alt="Attachment 2" class="object-contain h-full w-full" />
-                    <span v-else class="text-gray-400">Tidak ada file</span>
-                  </div>
-                  <div class="font-semibold text-sm mb-1">Lampiran 2</div>
-                  <a v-if="record.attachment_2_url" :href="record.attachment_2_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
-                </div>
-                <div class="bg-white rounded shadow p-4 flex flex-col items-center">
-                  <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded mb-2">
-                    <img v-if="record.attachment_3_url" :src="record.attachment_3_url" alt="Attachment 3" class="object-contain h-full w-full" />
-                    <span v-else class="text-gray-400">Tidak ada file</span>
-                  </div>
-                  <div class="font-semibold text-sm mb-1">Lampiran 3</div>
-                  <a v-if="record.attachment_3_url" :href="record.attachment_3_url" target="_blank" class="text-blue-500 text-xs underline">Lihat File</a>
-                </div>
-              </div>
-            </div>
           </div>
+          <div>
+          <UFileViewer
+            :visible="showFileViewer"
+            :file-url="documentViewer.path"
+            :file-name="documentViewer.file_name"
+            @close="showFileViewer = false"
+          />
+          </div>
+  
           <div>
             <div class="text-sm font-bold text-gray-400 uppercase mt-5 mb-2">MAP LOKASI</div>
             <UMap
@@ -244,7 +245,9 @@
         </div>
   
       </div>
-  
+
+      
+      
       <!-- Form Delete -->
       <UFormDelete @delete="postDelete" />
     </div>
@@ -267,6 +270,7 @@
     UTextArea,
     UChip,
     UMap,
+    UFileViewer,
   } from "@/components";
   import { debounce } from "lodash";
   
@@ -283,7 +287,8 @@
       UTextField,
       UTextArea,
       UChip,
-      UMap
+      UMap,
+      UFileViewer,
     },
     setup() {
       const store = useAppStore();
@@ -325,6 +330,15 @@
       const isOpen = ref(false);
       const selectedOption = ref(null);
       const keyWord = ref(null);
+
+      const showFileViewer = ref(false);
+      const documentViewer = ref({
+        path: "",
+        file_name: "",
+        file_size: "",
+        file_type: "",
+      });
+     
   
       /**
        * Function Page
@@ -392,6 +406,9 @@
           edit: false,
           page:true,
         });
+        store.setPage({
+          showtable:false
+        })
       };
   
       /**
@@ -535,6 +552,12 @@
         });
       };
 
+      const showDocument = (document) => {
+        showFileViewer.value = true;
+        documentViewer.value = document;
+
+      }
+
       
       onMounted(() => {
         store.setPage({
@@ -599,6 +622,9 @@
         showCategoryPage,
         showVerifikasiPage,
         closeVerifikasiPage,
+        showFileViewer,
+        documentViewer,
+        showDocument,
       };
     },
   };
