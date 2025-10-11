@@ -42,7 +42,7 @@ const menus = {
             }
         },
         {
-            title: "Survey",
+            title: "Survei",
             props: {
                 type: "group",
                 icon: "ri-megaphone-line",
