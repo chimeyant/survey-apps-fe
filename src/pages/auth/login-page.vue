@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import loginPage from  "@/modules/auths/loginPage1.vue";
+import loginPage from "@/modules/auths/loginPage1.vue";
 export default {
   components: {
     loginPage,
