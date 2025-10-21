@@ -4,6 +4,7 @@
       title="Daftar Data Survey"
       @onRefresh="fetchRecords({})"
       @onAdd="addNew"
+      @onExport="exportToExcel"
       v-model:keyword="keyWord"
       v-show="!form.page"
     >
@@ -345,6 +346,29 @@ export default {
       file_type: "",
     });
 
+    const markers = computed(() => {
+      if (record.value && record.value.latitude && record.value.longitude) {
+        return [
+          {
+            latitude: parseFloat(record.value.latitude),
+            longitude: parseFloat(record.value.longitude),
+            title: record.value.address || "Lokasi Survey",
+          },
+        ];
+      }
+      return [];
+    });
+
+    const defaultMarker = computed(() => {
+      if (record.value && record.value.latitude && record.value.longitude) {
+        return {
+          latitude: parseFloat(record.value.latitude),
+          longitude: parseFloat(record.value.longitude),
+        };
+      }
+      return null;
+    });
+
     /**
      * Function Page
      */
@@ -569,6 +593,46 @@ export default {
       documentViewer.value = document;
     };
 
+    const exportToExcel = async () => {
+      try {
+        const params = {
+          keyWord: keyWord.value || "",
+        };
+
+        // Build query string
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${endpoint}-export?${queryString}`;
+
+        // Fetch the file
+        const response = await store.fetchExport(url);
+
+        // Create a blob from the response
+        const blob = new Blob([response.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        // Create download link
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute(
+          "download",
+          `Data_Survey_${new Date().getTime()}.xlsx`
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Clean up
+        window.URL.revokeObjectURL(downloadUrl);
+
+        store.setSnackbar("Export berhasil", colors.value.SUCCESS, types.value.SUCCESS);
+      } catch (error) {
+        console.error("Export failed:", error);
+        store.setSnackbar("Export gagal", colors.value.ERROR, types.value.ERROR);
+      }
+    };
+
     onBeforeUnmount(() => {
       showFileViewer.value = false;
       documentViewer.value = {
@@ -606,7 +670,7 @@ export default {
           edit: false,
           delete: true,
           bulkdelete: false,
-          export: false,
+          export: true,
           print: false,
           help: false,
           close: false,
@@ -652,6 +716,9 @@ export default {
       showFileViewer,
       documentViewer,
       showDocument,
+      exportToExcel,
+      markers,
+      defaultMarker,
     };
   },
 };

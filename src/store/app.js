@@ -433,6 +433,19 @@ export const useAppStore = defineStore("app", {
             }
         },
 
+        async fetchExport(url) {
+            try {
+                this.table.loading = true;
+                const response = await apiService.downloadFile(url);
+                return response;
+            } catch (error) {
+                this.catchError(error);
+                throw error;
+            } finally {
+                this.table.loading = false;
+            }
+        },
+
         async postRecord(endpoint, payload, method = "store", encrypt) {
             try {
                 this.form.loading = true;

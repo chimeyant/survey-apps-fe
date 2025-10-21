@@ -125,6 +125,18 @@ class ApiService {
             return Promise.reject(error);
         }
     }
+
+    async downloadFile(url) {
+        try {
+            const response = await this.axiosInstance.get(url, {
+                responseType: "blob",
+                timeout: 60000,
+            });
+            return response;
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 }
 
 export default new ApiService();
