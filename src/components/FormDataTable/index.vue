@@ -3,16 +3,16 @@
     class="flex flex-col h-full w-full  animate-fadeIn px-2"
     v-show="!form.page"
   >
-  <div class="lg:w-full h-[45px] bg-gradient-to-r from-cyan-700 to-cyan-500  relative overflow-hidden rounded-t-md ">
+    <div class="lg:w-full h-[45px] bg-gradient-to-r from-cyan-700 to-cyan-500  relative overflow-hidden rounded-t-md ">
       <div class="flex justify-between items-center h-full w-full px-5">
         <div class="flex w-full h-full justify-start items-center py-2">
           <div
             class="text-gray-700 animate-fadeIn duration-300 "
             v-if="!page.actions.search"
           >
-          <span class="text-white">
-            {{ title }}
-          </span>
+            <span class="text-white">
+              {{ title }}
+            </span>
           </div>
           <div
             class="flex w-[300px] h-[35px] bg-white rounded-full overflow-hidden px-4 animate-fadeIn border border-cyan-300 text-sm border-3"
@@ -86,7 +86,7 @@
     </div>
     <div class="min-h-[65vh] w-full bg-gradient-to-b from-white-100 to-white shadow-lg round-b-md">
       <div class=" mx-5 my-5  overflow-scroll min-h-[65vh] ">
-        <slot name="data-table"/>
+        <slot name="data-table" />
       </div>
     </div>
   </div>
@@ -102,7 +102,7 @@ export default {
       type: String,
       default: "Your Title Here",
     },
-    keyword: {
+    keyWord: {
       type: String,
       default: null,
     },
@@ -113,10 +113,10 @@ export default {
   },
   setup(props, { emit }) {
     const store = useAppStore();
-    const themeColors = computed(() => store.getThemeColors); 
+    const themeColors = computed(() => store.getThemeColors);
     const page = computed(() => store.page);
     const title = ref(props.title);
-    const keyWord = ref(props.keyword);
+    const keyWord = ref(props.keyWord);
     const show = ref(props.show);
     const form = computed(() => store.form);
 
@@ -161,7 +161,7 @@ export default {
 
     // Listen Ketword
     watch(keyWord, (newVal) => {
-      emit("update:keyword", newVal);
+      emit("update:keyWord", newVal);
     });
 
     return {

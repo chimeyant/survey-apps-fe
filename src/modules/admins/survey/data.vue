@@ -2,10 +2,10 @@
   <div class="flex flex-col mt-4 w-full min-h-full animate-fadeIn ">
     <UFormDataTable
       title="Daftar Data Survey"
-      @onRefresh="fetchRecords({})"
+      @onRefresh="fetchRecords({keyWord: keyWord})"
       @onAdd="addNew"
       @onExport="exportToExcel"
-      v-model:keyword="keyWord"
+      v-model:keyWord="keyWord"
       v-show="!form.page"
     >
       <template v-slot:data-table>
@@ -384,11 +384,11 @@ export default {
      * Fetc Records Data From Service
      * @param payload
      */
-    const fetchRecords = async (payload) => {
+    const fetchRecords = async () => {
       const params = {
-        page: payload ? payload.page : 1,
-        itemsPerPage: payload.itemsPerPage ? payload.itemsPerPage : 10,
-        keyWord: payload ? payload.keyWord : null,
+        page: table.value ? table.value.page : 1,
+        itemsPerPage: table.value ? table.value.itemsPerPage : 10,
+        keyWord: table.value ? table.value.keyWord || keyWord.value : null,
       };
 
       const result = await store.fetchRecords(endpoint, params, true);
@@ -551,7 +551,8 @@ export default {
     });
 
     const onSearch = debounce(() => {
-      table.value.footer.keyWord = keyWord.value;
+      table.value.keyWord = keyWord.value;
+      fetchRecords();
     }, 1000);
 
     //custom page function
@@ -626,10 +627,18 @@ export default {
         // Clean up
         window.URL.revokeObjectURL(downloadUrl);
 
-        store.setSnackbar("Export berhasil", colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          "Export berhasil",
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
       } catch (error) {
         console.error("Export failed:", error);
-        store.setSnackbar("Export gagal", colors.value.ERROR, types.value.ERROR);
+        store.setSnackbar(
+          "Export gagal",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
       }
     };
 
@@ -677,7 +686,7 @@ export default {
         },
         showtable: true,
       });
-      fetchRecords({});
+      fetchRecords();
     });
 
     return {

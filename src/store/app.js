@@ -87,7 +87,7 @@ export const useAppStore = defineStore("app", {
             itemsPerPage: 10,
             totalItems: 0,
             loading: false,
-            search: null,
+            keyWord: null,
             selects: [],
 
             footer: {
@@ -97,7 +97,6 @@ export const useAppStore = defineStore("app", {
                 lastPage: 1,
                 itemsPerPage: 10,
                 total: 0,
-                keyword: null,
             },
 
         },
