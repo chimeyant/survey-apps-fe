@@ -386,10 +386,16 @@ export default {
      */
     const fetchRecords = async () => {
       const params = {
-        page: table.value.footer.currentPage
-          ? table.value.footer.currentPage
+        page: table.value
+          ? table.value.keyWord != ""
+            ? 1
+            : table.value.footer.currentPage
           : 1,
-        itemsPerPage: table.value ? table.value.itemsPerPage : 10,
+        itemsPerPage: table.value
+          ? table.value.keyWord != ""
+            ? table.value.footer.itemsPerPage
+            : 10
+          : 10,
         keyWord: table.value ? table.value.keyWord || keyWord.value : null,
       };
 
