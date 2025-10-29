@@ -402,8 +402,6 @@ export default {
       const result = await store.fetchRecords(endpoint, params, true);
 
       store.setRecords(result?.data.data ? result.data.data : []);
-      // table.value.page = result?.data.meta.current_page;
-      // table.value.totalItems = result?.data.meta.total;
     };
 
     /**

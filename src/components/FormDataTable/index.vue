@@ -127,6 +127,15 @@ export default {
       }
     );
 
+    watch(
+      () => page.value.actions.search,
+      (newVal) => {
+        if (!newVal) {
+          keyWord.value = null;
+        }
+      }
+    );
+
     const actionRefresh = () => {
       emit("onRefresh");
     };
