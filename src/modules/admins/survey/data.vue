@@ -386,18 +386,18 @@ export default {
      */
     const fetchRecords = async () => {
       const params = {
-        page: table.value ? table.value.page : 1,
+        page: table.value.footer.currentPage
+          ? table.value.footer.currentPage
+          : 1,
         itemsPerPage: table.value ? table.value.itemsPerPage : 10,
         keyWord: table.value ? table.value.keyWord || keyWord.value : null,
       };
 
-      console.log(params);
-
       const result = await store.fetchRecords(endpoint, params, true);
 
       store.setRecords(result?.data.data ? result.data.data : []);
-      table.value.page = result?.data.meta.current_page;
-      table.value.totalItems = result?.data.meta.total;
+      // table.value.page = result?.data.meta.current_page;
+      // table.value.totalItems = result?.data.meta.total;
     };
 
     /**
