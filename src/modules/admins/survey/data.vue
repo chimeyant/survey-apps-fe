@@ -387,7 +387,7 @@ export default {
     const fetchRecords = async () => {
       const params = {
         page: table.value
-          ? table.value.keyWord != ""
+          ? table.value.keyWord
             ? 1
             : table.value.footer.currentPage
           : 1,
