@@ -6,7 +6,6 @@ import { colors, types, THEMES, DEFAULT_THEME } from "@/config/variable";
 import { MSG_ERROR } from "@/config/lang";
 import { useRouter } from "vue-router";
 import configMenus from "../config/menus";
-import { nextTick } from "vue";
 
 export const useAppStore = defineStore("app", {
     state: () => ({

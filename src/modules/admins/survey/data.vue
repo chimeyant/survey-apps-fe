@@ -233,7 +233,7 @@
             :latitude="record.latitude"
             :longitude="record.longitude"
             :markers="markers"
-            :showDefaultMarker="false"
+            :showDefaultMarker="true"
             :defaultMarker="defaultMarker"
           />
         </div>
@@ -263,7 +263,14 @@
   <script>
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import {
   UComboBox,
   USwitch,
@@ -337,6 +344,7 @@ export default {
     const isOpen = ref(false);
     const selectedOption = ref(null);
     const keyWord = ref(null);
+    const componentKey = ref(0);
 
     const showFileViewer = ref(false);
     const documentViewer = ref({
@@ -348,25 +356,42 @@ export default {
 
     const markers = computed(() => {
       if (record.value && record.value.latitude && record.value.longitude) {
-        return [
-          {
-            latitude: parseFloat(record.value.latitude),
-            longitude: parseFloat(record.value.longitude),
-            title: record.value.address || "Lokasi Survey",
-          },
-        ];
+        const lat = parseFloat(record.value.latitude);
+        const lng = parseFloat(record.value.longitude);
+
+        // Validate coordinates
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return [
+            {
+              latLng: [lat, lng],
+              title: record.value.address || "Lokasi Survey",
+              popup: record.value.address || "Lokasi Survey",
+            },
+          ];
+        }
       }
       return [];
     });
 
     const defaultMarker = computed(() => {
       if (record.value && record.value.latitude && record.value.longitude) {
-        return {
-          latitude: parseFloat(record.value.latitude),
-          longitude: parseFloat(record.value.longitude),
-        };
+        const lat = parseFloat(record.value.latitude);
+        const lng = parseFloat(record.value.longitude);
+
+        // Validate coordinates
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return {
+            latLng: [lat, lng],
+            title: record.value.address || "Lokasi Survey",
+            popup: record.value.address || "Lokasi Survey",
+          };
+        }
       }
-      return null;
+      return {
+        latLng: [-6.1725, 106.6267], // Jakarta coordinates as fallback
+        title: "Kantor Dinas Komunikasi Dan Informatika",
+        popup: "Kantor Dinas Komunikasi Dan Informatika",
+      };
     });
 
     /**
@@ -435,14 +460,16 @@ export default {
      */
     const showRecord = async (payload) => {
       const result = await store.showRecord(endpoint + "/" + payload, true);
-      store.setRecord(result);
-      store.setForm({
-        add: false,
-        edit: false,
-        page: true,
-      });
-      store.setPage({
-        showtable: false,
+      await store.setRecord(result);
+      await nextTick(() => {
+        store.setForm({
+          add: false,
+          edit: false,
+          page: true,
+        });
+        store.setPage({
+          showtable: false,
+        });
       });
     };
 

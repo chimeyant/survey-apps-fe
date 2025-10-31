@@ -6,77 +6,83 @@
         style="height: 100%; width: 100%;"
         :zoom="mapZoom"
         :center="mapCenter"
+        :key="mapKey"
       >
-      <!-- Default OpenStreetMap Layer -->
-      <l-tile-layer
-        :name="layers.openstreetmap.name"
-        :url="layers.openstreetmap.url"
-        :attribution="layers.openstreetmap.attribution"
-        layer-type="base"
-      />
-      
-      <!-- Additional Layers -->
-      <l-tile-layer
-        v-for="layerKey in additionalLayers"
-        :key="layerKey"
-        v-if="layers[layerKey]"
-        :name="layers[layerKey].name"
-        :url="layers[layerKey].url"
-        :attribution="layers[layerKey].attribution"
-        layer-type="base"
-      />
-      
-      <!-- Layer Control - Show if there are additional layers -->
-      <l-control-layers
-        v-if="showLayerControl && additionalLayers.length > 0"
-        :position="layerControlPosition"
-        :collapsed="layerControlCollapsed"
-      />
-      
-      <!-- Single marker from latitude/longitude props -->
-      <l-marker 
-        v-if="singleMarker && !hasMarkers"
-        :lat-lng="singleMarker"
-      ></l-marker>
+        <!-- Default OpenStreetMap Layer -->
+        <l-tile-layer
+          :name="layers.openstreetmap.name"
+          :url="layers.openstreetmap.url"
+          :attribution="layers.openstreetmap.attribution"
+          layer-type="base"
+        />
 
-      <!-- Always show markers -->
-      <l-marker
-        v-if="markers.length > 0 "
-        v-for="(marker, index) in markers"
-        :key="`marker-${index}`"
-        :lat-lng="marker.latLng"
-       :title="marker.title"
-      >
-        <l-popup>
-          <div v-html="marker.popup">
-          </div>
-        </l-popup>
-      </l-marker>
-      
-      <!-- Default marker when no markers provided -->
-      <l-marker
-        v-if="showDefaultMarker && !hasMarkers && !singleMarker"
-        :lat-lng="defaultMarker.latLng"
-        :title="defaultMarker.title"
-      >
-        <l-popup v-if="defaultMarker.popup">
-          <div v-html="defaultMarker.popup"></div>
-        </l-popup>
-      </l-marker>
+        <!-- Additional Layers -->
+        <l-tile-layer
+          v-for="layerKey in additionalLayers"
+          :key="layerKey"
+          v-if="layers[layerKey]"
+          :name="layers[layerKey].name"
+          :url="layers[layerKey].url"
+          :attribution="layers[layerKey].attribution"
+          layer-type="base"
+        />
+
+        <!-- Layer Control - Show if there are additional layers -->
+        <l-control-layers
+          v-if="showLayerControl && additionalLayers.length > 0"
+          :position="layerControlPosition"
+          :collapsed="layerControlCollapsed"
+        />
+
+        <!-- Single marker from latitude/longitude props -->
+        <l-marker
+          v-if="singleMarker && !hasMarkers"
+          :lat-lng="singleMarker"
+        ></l-marker>
+
+        <!-- Always show markers -->
+        <l-marker
+          v-if="markers.length > 0 "
+          v-for="(marker, index) in markers"
+          :key="`marker-${index}`"
+          :lat-lng="marker.latLng"
+          :title="marker.title"
+        >
+          <l-popup>
+            <div v-html="marker.popup">
+            </div>
+          </l-popup>
+        </l-marker>
+
+        <!-- Default marker when no markers provided -->
+        <l-marker
+          v-if="showDefaultMarker && !hasMarkers && !singleMarker"
+          :lat-lng="defaultMarker.latLng"
+          :title="defaultMarker.title"
+        >
+          <l-popup v-if="defaultMarker.popup">
+            <div v-html="defaultMarker.popup"></div>
+          </l-popup>
+        </l-marker>
       </l-map>
     </div>
   </div>
 </template>
   
 <script>
-import { LMap, LTileLayer, LMarker, LPopup, LControlLayers } from "@vue-leaflet/vue-leaflet";
+import {
+  LMap,
+  LTileLayer,
+  LMarker,
+  LPopup,
+  LControlLayers,
+} from "@vue-leaflet/vue-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { mapActions } from "pinia";
 
 export default {
   components: {
@@ -90,58 +96,55 @@ export default {
     return {
       layers: {
         openstreetmap: {
-          name: 'OpenStreetMap',
-          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          name: "OpenStreetMap",
+          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         },
         satellite: {
-          name: 'Satellite',
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+          name: "Satellite",
+          url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
         },
         terrain: {
-          name: 'Terrain',
-          url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-          attribution: '&copy; <a href="https://opentopomap.org/">OpenTopoMap</a>'
+          name: "Terrain",
+          url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+          attribution:
+            '&copy; <a href="https://opentopomap.org/">OpenTopoMap</a>',
         },
         dark: {
-          name: 'Dark',
-          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          name: "Dark",
+          url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
         },
         watercolor: {
-          name: 'Watercolor',
-          url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg',
-          attribution: '&copy; <a href="https://stamen.com/">Stamen Design</a>'
+          name: "Watercolor",
+          url: "https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg",
+          attribution: '&copy; <a href="https://stamen.com/">Stamen Design</a>',
         },
         toner: {
-          name: 'Toner',
-          url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.png',
-          attribution: '&copy; <a href="https://stamen.com/">Stamen Design</a>'
-        }
+          name: "Toner",
+          url: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.png",
+          attribution: '&copy; <a href="https://stamen.com/">Stamen Design</a>',
+        },
       },
-      mapsarray1:[-6.1725, 106.6267],
-      mapsarray2:[-6.1825, 106.6367],
-      mapsarray3:[-6.1625, 106.6167],
-       markers2:[
-         {
-           latLng:[-6.1725, 106.6267],
-           title:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-           popup:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-         },
-         {
-           latLng:[-6.1825, 106.6367],
-           title:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-           popup:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-         },
-         {
-           latLng:[-6.1625, 106.6167],
-           title:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-           popup:"Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
-         },
-       ],
-       mapKey: 0,
-    
+      mapsarray1: [-6.1725, 106.6267],
+      mapsarray2: [-6.1825, 106.6367],
+      mapsarray3: [-6.1625, 106.6167],
+      markers2: [
+        {
+          latLng: [-6.1725, 106.6267],
+          title: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+          popup: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+        },
+        {
+          latLng: [-6.1825, 106.6367],
+          title: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+          popup: "Kantor Dinas Komunikasi Dan Informatika Kab. Tangerang",
+        },
+      ],
+      mapKey: 0,
     };
   },
   mounted() {
@@ -152,15 +155,15 @@ export default {
       iconUrl: markerIcon,
       shadowUrl: markerShadow,
     });
-    
+
     // Debug logging
-    console.log('Map component mounted');
-    console.log('Available layers:', this.availableLayers);
-    console.log('Additional layers:', this.additionalLayers);
-    console.log('Show layer control:', this.showLayerControl);
-    console.log('Map center:', this.mapCenter);
-    console.log('Map zoom:', this.mapZoom);
-    console.log('Markers:', this.markers);
+    console.log("Map component mounted");
+    console.log("Available layers:", this.availableLayers);
+    console.log("Additional layers:", this.additionalLayers);
+    console.log("Show layer control:", this.showLayerControl);
+    console.log("Map center:", this.mapCenter);
+    console.log("Map zoom:", this.mapZoom);
+    console.log("Markers:", this.markers);
   },
   props: {
     latitude: {
@@ -194,7 +197,7 @@ export default {
     },
     center: {
       type: Array,
-      default: () => [-6.1725,106.6267],
+      default: () => [-6.1725, 106.6267],
     },
     showLayerControl: {
       type: Boolean,
@@ -202,7 +205,7 @@ export default {
     },
     layerControlPosition: {
       type: String,
-      default: 'topright',
+      default: "topright",
     },
     layerControlCollapsed: {
       type: Boolean,
@@ -210,10 +213,8 @@ export default {
     },
     availableLayers: {
       type: Array,
-      default: () => ['openstreetmap', 'terrain', 'satellite', 'dark'],
+      default: () => ["openstreetmap", "terrain", "satellite", "dark"],
     },
-
-    
   },
   watch: {
     markers: {
@@ -221,43 +222,43 @@ export default {
         // Markers updated
       },
       deep: true,
-      immediate: true
+      immediate: true,
     },
-     markers2: {
-       handler(newMarkers, oldMarkers) {
-         // Markers updated - reload map component
-         console.log('Markers2 changed:', newMarkers);
-         this.mapKey += 1; // This will force the map to reload
-       },
-       deep: true,
-       immediate: false
-     }
   },
   computed: {
     // Check if markers array has items
     hasMarkers() {
       return this.markers && this.markers.length > 0;
     },
-    
+
     // Single marker coordinates from props
     singleMarker() {
       if (this.latitude && this.longitude) {
-        return [parseFloat(this.latitude), parseFloat(this.longitude)];
+        const lat = parseFloat(this.latitude);
+        const lng = parseFloat(this.longitude);
+
+        // Validate coordinates are not NaN
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return [lat, lng];
+        }
       }
       return null;
     },
-    
+
     // Map center - use markers center or single marker or default marker or center prop
     mapCenter() {
       if (this.hasMarkers) {
         // Calculate center from markers
-        const lats = this.markers.map(m => m.latLng ? m.latLng[0] : m.lat);
-        const lngs = this.markers.map(m => m.latLng ? m.latLng[1] : m.lng);
-        
+        const lats = this.markers.map((m) => (m.latLng ? m.latLng[0] : m.lat));
+        const lngs = this.markers.map((m) => (m.latLng ? m.latLng[1] : m.lng));
+
         const avgLat = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
         const avgLng = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
-        
-        return [avgLat, avgLng];
+
+        // Validate coordinates are not NaN
+        if (!isNaN(avgLat) && !isNaN(avgLng)) {
+          return [avgLat, avgLng];
+        }
       } else if (this.singleMarker) {
         return this.singleMarker;
       } else if (this.showDefaultMarker && this.defaultMarker) {
@@ -265,7 +266,7 @@ export default {
       }
       return this.center;
     },
-    
+
     // Map zoom level
     mapZoom() {
       if (this.hasMarkers && this.markers.length > 1) {
@@ -274,21 +275,21 @@ export default {
       }
       return this.zoom;
     },
-    
+
     // Additional layers (excluding openstreetmap which is always shown)
     additionalLayers() {
-      return this.availableLayers.filter(layer => layer !== 'openstreetmap');
+      return this.availableLayers.filter((layer) => layer !== "openstreetmap");
     },
-    
+
     // Check if markers2 has items
     hasMarkers2() {
       return this.markers2 && this.markers2.length > 0;
-    }
+    },
   },
   methods: {
     getMarkerCoordinates(marker) {
       let coordinates;
-      
+
       // Try different coordinate formats
       if (marker.latLng && Array.isArray(marker.latLng)) {
         coordinates = marker.latLng;
@@ -303,34 +304,36 @@ export default {
       } else {
         coordinates = [-6.1725, 106.6267]; // fallback
       }
-      
+
       // Ensure coordinates are numbers
       if (Array.isArray(coordinates) && coordinates.length >= 2) {
         coordinates = [Number(coordinates[0]), Number(coordinates[1])];
       }
-      
+
       // Validate coordinates
       if (!Array.isArray(coordinates) || coordinates.length !== 2) {
         coordinates = [-6.1725, 106.6267];
       }
-      
+
       if (isNaN(coordinates[0]) || isNaN(coordinates[1])) {
         coordinates = [-6.1725, 106.6267];
       }
-      
+
       return coordinates;
     },
-    
+
     getMarkerOptions(marker) {
       // Always return empty options to use default Leaflet markers
       return {};
     },
-    
+
     // Get available layer names for debugging
     getAvailableLayerNames() {
-      return this.availableLayers.map(key => this.layers[key]?.name).filter(Boolean);
-    }
-  }
+      return this.availableLayers
+        .map((key) => this.layers[key]?.name)
+        .filter(Boolean);
+    },
+  },
 };
 </script>
   
