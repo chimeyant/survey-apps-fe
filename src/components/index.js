@@ -32,9 +32,11 @@ import UThemeSwitcher from "./ThemeSwitcher/index.vue"
 import UThemeDemo from "./ThemeDemo/index.vue"
 import UFormCustomePage from "./FormCustomePage/index.vue"
 import UFileViewer from "./FileViewer/index.vue"
+import UCheckbox from "./CheckBox/index.vue"
+import UCheckboxGroup from "./CheckBox/CheckboxGroup.vue"
 
 import UTable from "./Table/index.vue"
 
 
 
-export { UPagination, UComboBox, UPhoneInput, UButton, UTextField, UTextArea, USwitch, UToast, UDataTable, UDataMobile, UFormPage, UDropdownOpsi, UFormDelete, USkeletonTable, UFormDialog, UFormDataTable, UFileUpload, UBreadcrumb, UChip, BarChart, PieChart, AreaChart, CardOne, CardTwo, CardThree, CardFour, UMap, UMapCoordinatePicker, UPhotoUpload, UThemeSwitcher, UThemeDemo, UFormCustomePage, UTable, UFileViewer }
+export { UPagination, UComboBox, UPhoneInput, UButton, UTextField, UTextArea, USwitch, UToast, UDataTable, UDataMobile, UFormPage, UDropdownOpsi, UFormDelete, USkeletonTable, UFormDialog, UFormDataTable, UFileUpload, UBreadcrumb, UChip, BarChart, PieChart, AreaChart, CardOne, CardTwo, CardThree, CardFour, UMap, UMapCoordinatePicker, UPhotoUpload, UThemeSwitcher, UThemeDemo, UFormCustomePage, UTable, UFileViewer, UCheckbox, UCheckboxGroup }
