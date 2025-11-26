@@ -118,7 +118,7 @@
                 </button>
                 <button
                   class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded-pil text-sm border-l-orange-800 border-l-4 ml-2"
-                  @click=""
+                  @click="editQuestion(item)"
                 >
                   <i class="ri-edit-2-fill text-xs"></i>
                 </button>
@@ -514,6 +514,44 @@ export default {
       }
     };
 
+    const postUpdate = async () => {
+      if (!record.value.id && !record.value.uuid) {
+        store.setSnackbar(
+          "Data pertanyaan tidak valid",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
+        return;
+      }
+
+      record.value.question_number = parseInt(record.value.question_number);
+      record.value.options = formOptions.value.records;
+
+      console.log(record.value);
+
+      const result = await store.postRecord(
+        endpoint + "/" + (record.value.uuid || record.value.id),
+        record.value,
+        "update",
+        true
+      );
+
+      if (result?.data.status) {
+        store.setSnackbar(
+          result.data.message,
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
+
+        store.setForm({
+          add: false,
+          edit: false,
+        });
+
+        fetchRecords();
+      }
+    };
+
     const postConfirmDelete = async (id) => {
       store.setForm({
         add: false,
@@ -562,6 +600,27 @@ export default {
       );
 
       console.log(formOptions.value.records);
+    };
+
+    const editQuestion = (item) => {
+      if (!item) {
+        return;
+      }
+
+      const cloned = {
+        ...item,
+        question_number: item.question_number,
+      };
+
+      store.setRecord(cloned);
+      formOptions.value.records = Array.isArray(item.options)
+        ? item.options.map((option) => ({ ...option }))
+        : [];
+
+      store.setForm({
+        add: true,
+        edit: true,
+      });
     };
 
     const sendSurvey = async () => {
@@ -635,6 +694,7 @@ export default {
       sort_orders,
       options,
       postRecord,
+      postUpdate,
       sendSurvey,
       question,
       questions,
@@ -647,6 +707,7 @@ export default {
       addOption,
       deleteOption,
       survey_info,
+      editQuestion,
     };
   },
 };
