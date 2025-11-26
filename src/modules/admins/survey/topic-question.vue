@@ -16,117 +16,115 @@
             v-for="item in records"
             :key="item.id"
           >
-            <div class="col-span-11">
-              <div :class="item.width">
-                <UTextField
-                  v-if="item.question_type === 'text'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :required="item.required"
-                />
-                <UTextArea
-                  v-else-if="item.question_type === 'textarea'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :required="item.required"
-                />
-                <UComboBox
-                  v-else-if="item.question_type === 'select'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :items="item.options || []"
-                  :required="item.required"
-                />
 
-                <URadioGroup
-                  v-else-if="item.question_type === 'radio'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :options="item.options || []"
-                  :required="item.required"
-                />
-                <UCheckbox
-                  v-else-if="item.question_type === 'checkbox'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :required="item.required"
-                />
-                <UTextField
-                  v-else-if="item.question_type === 'number'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  type="number"
-                  :required="item.required"
-                />
-                <UTextField
-                  v-else-if="item.question_type === 'date'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  type="date"
-                  :required="item.required"
-                />
-                <UTextField
-                  v-else-if="item.question_type === 'time'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  type="time"
-                  :required="item.required"
-                />
-                <UFileUpload
-                  v-else-if="item.question_type === 'file'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :required="item.required"
-                  folder="documents"
-                />
-                <USwitch
-                  v-else-if="item.question_type === 'switch'"
-                  v-model="questions[item.id]"
-                  :label="item.question_text"
-                  :required="item.required"
-                />
+            <div :class="item.width || 'col-span-12'">
+              <UTextField
+                v-if="item.question_type === 'text'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+              />
+              <UTextArea
+                v-else-if="item.question_type === 'textarea'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+              />
+              <UComboBox
+                v-else-if="item.question_type === 'select'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :items="item.options || []"
+                :required="item.required"
+              />
 
-                <div v-else-if="item.question_type === 'location'">
-                  <label class="block text-sm font-medium text-gray-700 mb-3">
-                    {{ item.question_text }} <span
-                      v-if="item.required"
-                      class="text-red-500"
-                    >*</span>
-                  </label>
-                  <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                    <UMapCoordinatePicker
-                      v-model="coordinates"
-                      @update:modelValue="onLocationChange"
-                      :initial-location="initialLocation"
-                    />
-                  </div>
-                  <p class="text-sm text-gray-500 mt-2">
-                    💡 Klik di peta atau gunakan tombol "Lokasi Saat Ini" untuk mendapatkan koordinat GPS
-                  </p>
+              <URadioGroup
+                v-else-if="item.question_type === 'radio'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :options="item.options || []"
+                :required="item.required"
+              />
+              <UCheckbox
+                v-else-if="item.question_type === 'checkbox'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+              />
+              <UTextField
+                v-else-if="item.question_type === 'number'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                type="number"
+                :required="item.required"
+              />
+              <UTextField
+                v-else-if="item.question_type === 'date'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                type="date"
+                :required="item.required"
+              />
+              <UTextField
+                v-else-if="item.question_type === 'time'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                type="time"
+                :required="item.required"
+              />
+              <UFileUpload
+                v-else-if="item.question_type === 'file'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+                folder="documents"
+              />
+              <USwitch
+                v-else-if="item.question_type === 'switch'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+              />
+
+              <div v-else-if="item.question_type === 'location'">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                  {{ item.question_text }} <span
+                    v-if="item.required"
+                    class="text-red-500"
+                  >*</span>
+                </label>
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                  <UMapCoordinatePicker
+                    v-model="coordinates"
+                    @update:modelValue="onLocationChange"
+                    :initial-location="initialLocation"
+                  />
                 </div>
+                <p class="text-sm text-gray-500 mt-2">
+                  💡 Klik di peta atau gunakan tombol "Lokasi Saat Ini" untuk mendapatkan koordinat GPS
+                </p>
+              </div>
 
-                <!-- Add more component types as needed -->
-                <div v-else>
-                  <span class="text-red-500">Unknown question type: {{ item.question_type }}</span>
-                </div>
-
+              <!-- Add more component types as needed -->
+              <div v-else>
+                <span class="text-red-500">Unknown question type: {{ item.question_type }}</span>
+              </div>
+              <div class="my-2">
+                <button
+                  class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-sm text-sm border-l-red-800 border-l-4"
+                  @click="postConfirmDelete(item.id)"
+                >
+                  <i class="ri-delete-bin-fill text-xs"></i>
+                </button>
+                <button
+                  class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded-pil text-sm border-l-orange-800 border-l-4 ml-2"
+                  @click=""
+                >
+                  <i class="ri-edit-2-fill text-xs"></i>
+                </button>
               </div>
             </div>
-            <div class="flex flex-row justify-end items-end align-middle py-1 gap-x-1">
-              <button
-                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-sm text-sm border-l-red-800 border-l-4"
-                @click="postConfirmDelete(item.id)"
-              >
-                <i class="ri-delete-bin-fill text-xs"></i>
-              </button>
-              <button
-                v-if="false"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-sm text-sm border-l-blue-800 border-l-4"
-                @click=""
-              >
-                <i class="ri-edit-line text-xs"></i>
-              </button>
-            </div>
+
           </template>
           <div class="col-span-12">
             <UButton
