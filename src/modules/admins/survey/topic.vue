@@ -40,10 +40,16 @@
                 >Tidak Aktif</span>
               </td>
               <td class="px-4 py-2 border border-gray-300 text-center">
-                <UChip
-                  label="Download QR Code"
-                  color="info"
-                />
+                <button
+                  type="button"
+                  class="focus:outline-none"
+                  @click="openQrModal(item.uuid)"
+                >
+                  <UChip
+                    label="Download QR Code"
+                    color="info"
+                  />
+                </button>
               </td>
               <td class="px-4 py-2 border border-gray-300 text-center">
                 <UChip
@@ -214,6 +220,62 @@
 
     <!-- Form Delete -->
     <UFormDelete @delete="postDelete" />
+    <!-- QR Preview Modal -->
+    <div
+      v-if="showQrModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+    >
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
+        <button
+          type="button"
+          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          @click="closeQrModal"
+        >
+          <i class="ri-close-circle-fill text-2xl"></i>
+        </button>
+        <div class="space-y-3 text-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-800">
+            {{ qrMeta.name || "QR Survey Topic" }}
+          </h3>
+          <p class="text-sm text-gray-600">
+            {{ qrMeta.description || "Scan QR untuk membuka survei." }}
+          </p>
+        </div>
+        <div class="min-h-[300px] flex items-center justify-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
+          <div
+            v-if="qrLoading"
+            class="text-gray-500 text-sm"
+          >Menyiapkan QR Code...</div>
+          <img
+            v-else-if="qrPreview"
+            :src="qrPreview"
+            alt="QR Preview"
+            class="max-h-[360px] object-contain"
+          >
+          <div
+            v-else
+            class="text-red-500 text-sm"
+          >QR Code tidak tersedia.</div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+            @click="closeQrModal"
+          >
+            Tutup
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50"
+            :disabled="qrLoading || !qrPreview"
+            @click="downloadQr"
+          >
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
   
@@ -290,6 +352,15 @@ export default {
     const isOpen = ref(false);
     const selectedOption = ref(null);
     const keyWord = ref(null);
+    const showQrModal = ref(false);
+    const qrPreview = ref(null);
+    const qrLoading = ref(false);
+    const qrMeta = ref({
+      uuid: null,
+      name: "",
+      description: "",
+      url: "",
+    });
 
     /**
      * Function Page
@@ -418,6 +489,208 @@ export default {
     };
 
     const postConfirmBulkDelete = () => {};
+
+    /**
+     * Prepare QR modal preview
+     * @param payload
+     */
+    const openQrModal = async (payload) => {
+      try {
+        showQrModal.value = true;
+        qrLoading.value = true;
+        qrPreview.value = null;
+
+        const topic = records.value.find((item) => item.uuid === payload);
+
+        if (!topic) {
+          qrLoading.value = false;
+          store.setSnackbar(
+            "Data topik tidak ditemukan",
+            colors.value.ERROR,
+            types.value.ERROR
+          );
+          showQrModal.value = false;
+          return;
+        }
+
+        const surveyUrl =
+          topic.url || `${window.location.origin}/survey/topic/${payload}`;
+
+        qrMeta.value = {
+          uuid: payload,
+          name: topic.name,
+          description: topic.description,
+          url: surveyUrl,
+        };
+
+        const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
+          surveyUrl
+        )}`;
+
+        const response = await fetch(qrEndpoint);
+
+        if (!response.ok) {
+          throw new Error("QR request failed");
+        }
+
+        const blob = await response.blob();
+        const qrWithText = await composeQrImage(
+          blob,
+          topic.name,
+          topic.description
+        );
+        qrPreview.value = qrWithText;
+
+        store.setSnackbar(
+          "QR Code siap diunduh",
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
+      } catch (error) {
+        console.error("openQrModal error:", error);
+        showQrModal.value = false;
+        store.setSnackbar(
+          "Gagal menyiapkan QR Code",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
+      } finally {
+        qrLoading.value = false;
+      }
+    };
+
+    /**
+     * Download QR from modal preview
+     */
+    const downloadQr = () => {
+      if (!qrPreview.value || !qrMeta.value.uuid) {
+        return;
+      }
+
+      const link = document.createElement("a");
+      const safeName = (qrMeta.value.name || "qr-code")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      link.href = qrPreview.value;
+      link.download = `${safeName}-${qrMeta.value.uuid}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      store.setSnackbar(
+        "QR Code berhasil diunduh",
+        colors.value.SUCCESS,
+        types.value.SUCCESS
+      );
+    };
+
+    const closeQrModal = () => {
+      showQrModal.value = false;
+      qrPreview.value = null;
+      qrMeta.value = {
+        uuid: null,
+        name: "",
+        description: "",
+        url: "",
+      };
+    };
+
+    /**
+     * Compose QR with title & description text
+     * @param blob
+     * @param title
+     * @param description
+     * @returns {Promise<string>}
+     */
+    const composeQrImage = (blob, title, description) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const padding = 24;
+          const infoHeight = 120;
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width + padding * 2;
+          canvas.height = img.height + infoHeight + padding * 2;
+
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          ctx.fillStyle = "#1f2937";
+          ctx.textAlign = "center";
+
+          const centerX = canvas.width / 2;
+          ctx.font = "bold 24px Arial";
+          wrapAndDrawText(
+            ctx,
+            title || "Survey Topic",
+            centerX,
+            padding,
+            canvas.width - padding * 2,
+            28
+          );
+
+          ctx.font = "16px Arial";
+          wrapAndDrawText(
+            ctx,
+            description || "Scan QR untuk membuka survei.",
+            centerX,
+            padding + 40,
+            canvas.width - padding * 2,
+            22
+          );
+
+          ctx.drawImage(img, padding, infoHeight, img.width, img.height);
+
+          resolve(canvas.toDataURL("image/png"));
+        };
+
+        const objectUrl = URL.createObjectURL(blob);
+
+        img.onerror = (err) => {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
+        };
+
+        img.onloadend = () => {
+          URL.revokeObjectURL(objectUrl);
+        };
+
+        img.src = objectUrl;
+      });
+    };
+
+    /**
+     * Helper to wrap and draw text centered
+     */
+    const wrapAndDrawText = (
+      ctx,
+      text,
+      centerX,
+      startY,
+      maxWidth,
+      lineHeight
+    ) => {
+      const words = text.split(" ");
+      let line = "";
+      let y = startY;
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + " ";
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && i > 0) {
+          ctx.fillText(line.trim(), centerX, y);
+          line = words[i] + " ";
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+
+      ctx.fillText(line.trim(), centerX, y);
+    };
 
     const openHelper = () => {
       store.setForm({
@@ -556,6 +829,13 @@ export default {
       showDocumentPage,
       showCategoryPage,
       showTopicQuestionPage,
+      openQrModal,
+      downloadQr,
+      closeQrModal,
+      showQrModal,
+      qrPreview,
+      qrLoading,
+      qrMeta,
     };
   },
 };
