@@ -185,7 +185,7 @@
                 </button>
               </div>
               <table class="w-full border-collapse border border-gray-300">
-                <thead>
+                <thead class="text-sm font-thin bg-gray-200 h-[30px]">
                   <th>
                     Value
                   </th>
