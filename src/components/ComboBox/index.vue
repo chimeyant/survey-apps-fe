@@ -44,7 +44,7 @@
       >
         <div class="flex justify-between items-center">
           <span :class="{ 'text-gray-400': !selectedText }">
-            {{ selectedText || placeholder || 'Select an option' }}
+            {{ selectedText || placeholder || 'Pilih Opsi' }}
           </span>
           <i :class="[
             'ri-arrow-down-s-line transition-transform duration-200',

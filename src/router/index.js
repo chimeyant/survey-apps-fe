@@ -37,7 +37,7 @@ const routes = [
         redirect: 'survey'
     },
     {
-        path: '/survey',
+        path: '/survey/:survey_topic_id',
         name: 'survey',
         component: survey,
     },
@@ -145,7 +145,6 @@ const router = createRouter({
 // Navigation Guard for authentication
 router.beforeEach((to, from, next) => {
     const auth = new authProvider();
-
 
     if (window.top !== window.self) {
         alert('Akses ditolak: Aplikasi tidak dapat disematkan dalam iframe.');

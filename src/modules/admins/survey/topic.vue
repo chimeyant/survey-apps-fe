@@ -514,7 +514,7 @@ export default {
         }
 
         const surveyUrl =
-          topic.url || `${window.location.origin}/survey/topic/${payload}`;
+          topic.url || `${window.location.origin}/survey/${payload}`;
 
         qrMeta.value = {
           uuid: payload,
