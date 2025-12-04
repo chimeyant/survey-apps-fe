@@ -267,6 +267,14 @@
           </button>
           <button
             type="button"
+            class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            :disabled="qrLoading || !qrMeta.url"
+            @click="openLink"
+          >
+            Buka Link
+          </button>
+          <button
+            type="button"
             class="px-4 py-2 rounded-md bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50"
             :disabled="qrLoading || !qrPreview"
             @click="downloadQr"
@@ -513,8 +521,9 @@ export default {
           return;
         }
 
-        const surveyUrl =
-          topic.url || `${window.location.origin}/survey/${payload}`;
+        console.log(topic.url);
+
+        const surveyUrl = `${window.location.origin}/survey/${payload}`;
 
         qrMeta.value = {
           uuid: payload,
@@ -584,6 +593,16 @@ export default {
         colors.value.SUCCESS,
         types.value.SUCCESS
       );
+    };
+
+    /**
+     * Open survey link in new tab
+     */
+    const openLink = () => {
+      if (!qrMeta.value.url) {
+        return;
+      }
+      window.open(qrMeta.value.url, "_blank");
     };
 
     const closeQrModal = () => {
@@ -831,6 +850,7 @@ export default {
       showTopicQuestionPage,
       openQrModal,
       downloadQr,
+      openLink,
       closeQrModal,
       showQrModal,
       qrPreview,
