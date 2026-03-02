@@ -105,6 +105,14 @@
                 </p>
               </div>
 
+              <div v-else-if="item.question_type === 'lokasi' || item.question_type === 'location-address'">
+                <ULokasi
+                  v-model="questions[item.id]"
+                  :label-kecamatan="item.question_text"
+                  :required="item.required"
+                />
+              </div>
+
               <!-- Add more component types as needed -->
               <div v-else>
                 <span class="text-red-500">Unknown question type: {{ item.question_type }}</span>
@@ -270,7 +278,14 @@
 
 <script>
 import { useAppStore } from "@/store/app";
-import { computed, onBeforeUnmount, onMounted, ref, reactive } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  reactive,
+  watch,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import {
   UButton,
@@ -285,6 +300,7 @@ import {
   UCheckboxGroup,
   UCheckbox,
 } from "@/components";
+import ULokasi from "@/components/Lokasi/index.vue";
 export default {
   components: {
     UComboBox,
@@ -298,6 +314,7 @@ export default {
     UMapCoordinatePicker,
     UFormDelete,
     UCheckbox,
+    ULokasi,
   },
   setup() {
     const store = useAppStore();
@@ -315,8 +332,26 @@ export default {
     const record = computed(() => store.record);
     const records = computed(() => store.records);
     const question = ref({});
-    const questions = ref([]);
+    const questions = ref({});
     const survey_info = ref({});
+
+    // Inisialisasi nilai lokasi (Kecamatan & Desa) saat records dimuat
+    watch(
+      records,
+      (recs) => {
+        if (!recs || !Array.isArray(recs)) return;
+        recs.forEach((r) => {
+          if (
+            (r.question_type === "lokasi" || r.question_type === "location-address") &&
+            (questions.value[r.id] === undefined ||
+              typeof questions.value[r.id] !== "object")
+          ) {
+            questions.value[r.id] = { district_code: "", village_code: "" };
+          }
+        });
+      },
+      { immediate: true, deep: true }
+    );
 
     const endpoint =
       "api/v1/survey/survey-topic-questions/" + route.params.survey_topic_id;
@@ -369,6 +404,10 @@ export default {
       {
         value: "location",
         label: "Location",
+      },
+      {
+        value: "location-address",
+        label: "Lokasi (Kecamatan & Desa)",
       },
     ]);
 

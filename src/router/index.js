@@ -24,6 +24,7 @@ import surveyData from "@/pages/admin/survey/data-pages.vue"
 import surveyTopicQuestion from "@/pages/admin/survey/topic-question-page.vue"
 
 import survey from "@/pages/landing/survey-page.vue"
+import surveyQuestionPage from "@/pages/landing/survey-question-page.vue"
 import sendingSuccess from "@/pages/landing/sending-success.vue"
 
 
@@ -39,6 +40,11 @@ const routes = [
     {
         path: '/survey/:survey_topic_id',
         name: 'survey',
+        component: surveyQuestionPage,
+    },
+    {
+        path: '/survey-simple/:survey_topic_id',
+        name: 'survey-simple',
         component: survey,
     },
     {
