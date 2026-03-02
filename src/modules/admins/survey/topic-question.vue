@@ -72,6 +72,14 @@
                 type="time"
                 :required="item.required"
               />
+              <UDateTimePicker
+                v-else-if="item.question_type === 'datetime'"
+                v-model="questions[item.id]"
+                :label="item.question_text"
+                :required="item.required"
+                placeholder="Pilih tanggal & waktu"
+                clearable
+              />
               <UFileUpload
                 v-else-if="item.question_type === 'file'"
                 v-model="questions[item.id]"
@@ -299,6 +307,7 @@ import {
   UFormDelete,
   UCheckboxGroup,
   UCheckbox,
+  UDateTimePicker,
 } from "@/components";
 import ULokasi from "@/components/Lokasi/index.vue";
 export default {
@@ -314,6 +323,7 @@ export default {
     UMapCoordinatePicker,
     UFormDelete,
     UCheckbox,
+    UDateTimePicker,
     ULokasi,
   },
   setup() {
@@ -400,6 +410,18 @@ export default {
       {
         value: "number",
         label: "Number",
+      },
+      {
+        value: "date",
+        label: "Date",
+      },
+      {
+        value: "time",
+        label: "Time",
+      },
+      {
+        value: "datetime",
+        label: "Date & Time",
       },
       {
         value: "location",
