@@ -23,6 +23,7 @@ import surveyTopicCategory from "@/pages/admin/survey/topic-category-page.vue"
 import surveyData from "@/pages/admin/survey/data-pages.vue"
 import surveyTopicQuestion from "@/pages/admin/survey/topic-question-page.vue"
 
+import homePage from "@/pages/landing/home-page.vue"
 import survey from "@/pages/landing/survey-page.vue"
 import surveyQuestionPage from "@/pages/landing/survey-question-page.vue"
 import sendingSuccess from "@/pages/landing/sending-success.vue"
@@ -34,11 +35,12 @@ import sendingSuccess from "@/pages/landing/sending-success.vue"
 
 const routes = [
     {
-        path: '',
-        redirect: 'survey'
+        path: "/",
+        name: "home",
+        component: homePage,
     },
     {
-        path: '/survey/:survey_topic_id',
+        path: "/survey/:survey_topic_id",
         name: 'survey',
         component: surveyQuestionPage,
     },
