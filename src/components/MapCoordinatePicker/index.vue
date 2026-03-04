@@ -3,7 +3,7 @@
     <!-- Input Fields -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
+        <label class="block text-sm font-medium text-gray-900 mb-2">
           Latitude <span class="text-red-500">*</span>
         </label>
         <UTextField
@@ -14,7 +14,7 @@
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
+        <label class="block text-sm font-medium text-gray-900 mb-2">
           Longitude <span class="text-red-500">*</span>
         </label>
         <UTextField
@@ -30,7 +30,7 @@
     <div class="flex flex-wrap gap-2 mb-4">
       <UButton
         type="button"
-        variant="outline"
+        variant="outline-dark"
         size="sm"
         @click="getCurrentLocation"
         :loading="isGettingLocation"
@@ -39,7 +39,7 @@
       </UButton>
       <UButton
         type="button"
-        variant="outline"
+        variant="outline-dark"
         size="sm"
         @click="centerMapOnInput"
         :disabled="!isValidCoordinates"
@@ -48,7 +48,7 @@
       </UButton>
       <UButton
         type="button"
-        variant="outline"
+        variant="outline-dark"
         size="sm"
         @click="copyCoordinates"
         :disabled="!isValidCoordinates"
@@ -81,8 +81,8 @@
         >
           <l-popup>
             <div class="text-center">
-              <p class="font-semibold">Lokasi Terpilih</p>
-              <p class="text-sm text-gray-600">
+              <p class="font-semibold text-gray-900">Lokasi Terpilih</p>
+              <p class="text-sm text-gray-700">
                 Lat: {{ markerPosition[0].toFixed(6) }}<br>
                 Lng: {{ markerPosition[1].toFixed(6) }}
               </p>
@@ -106,8 +106,8 @@
         >
           <l-popup>
             <div class="text-center">
-              <p class="font-semibold text-blue-600">📍 Lokasi Anda</p>
-              <p class="text-sm text-gray-600">
+              <p class="font-semibold text-blue-800">📍 Lokasi Anda</p>
+              <p class="text-sm text-gray-700">
                 Lat: {{ currentLocation[0].toFixed(6) }}<br>
                 Lng: {{ currentLocation[1].toFixed(6) }}
               </p>
@@ -118,26 +118,26 @@
     </div>
 
     <!-- Map Controls -->
-    <div class="flex justify-between items-center mt-3 text-sm text-gray-600">
+    <div class="flex flex-wrap justify-between items-center gap-3 mt-3 text-sm text-gray-800">
       <div>
-        <span class="font-medium">Petunjuk:</span>
-        Klik di peta untuk memilih lokasi, atau drag marker untuk memindahkan posisi
+        <span class="font-semibold text-gray-900">Petunjuk:</span>
+        <span class="text-gray-700"> Klik di peta untuk memilih lokasi, atau drag marker untuk memindahkan posisi</span>
       </div>
       <div class="flex gap-4">
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer font-medium text-gray-900">
           <input
             type="checkbox"
             v-model="showSatellite"
             @change="toggleMapType"
-            class="mr-1"
+            class="mr-2"
           >
           Satelit
         </label>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer font-medium text-gray-900">
           <input
             type="checkbox"
             v-model="autoCenter"
-            class="mr-1"
+            class="mr-2"
           >
           Auto Center
         </label>
@@ -145,11 +145,11 @@
     </div>
 
     <!-- Coordinate Info -->
-    <div v-if="markerPosition" class="mt-3 p-3 bg-blue-50 rounded-lg">
-      <div class="flex justify-between items-center">
+    <div v-if="markerPosition" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex flex-wrap justify-between items-center gap-2">
         <div>
-          <p class="text-sm font-medium text-blue-900">Koordinat Terpilih:</p>
-          <p class="text-sm text-blue-700">
+          <p class="text-sm font-semibold text-blue-900">Koordinat Terpilih:</p>
+          <p class="text-sm font-medium text-blue-800">
             {{ markerPosition[0].toFixed(6) }}, {{ markerPosition[1].toFixed(6) }}
           </p>
         </div>

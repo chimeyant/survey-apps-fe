@@ -1,7 +1,10 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased py-12 px-4 sm:px-6 lg:px-8">
     <!-- Decorative background -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div
+      class="fixed inset-0 overflow-hidden pointer-events-none"
+      aria-hidden="true"
+    >
       <div class="absolute -top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full bg-cyan-500/10 blur-3xl" />
       <div class="absolute top-[60%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-3xl" />
       <div class="absolute top-[20%] left-[30%] w-[40%] h-[40%] rounded-full bg-teal-500/5 blur-2xl" />
@@ -103,7 +106,7 @@
                   :required="item.required"
                 />
                 <div v-else-if="item.question_type === 'location'">
-                  <label class="block text-sm font-medium text-gray-700 mb-3">
+                  <label class="block text-sm font-medium text-gray-900 mb-3">
                     {{ item.question_text }}
                     <span
                       v-if="item.required"
@@ -117,7 +120,7 @@
                       :initial-location="initialLocation"
                     />
                   </div>
-                  <p class="text-sm text-gray-500 mt-2">
+                  <p class="text-sm text-gray-600 mt-2">
                     💡 Klik di peta atau gunakan tombol "Lokasi Saat Ini" untuk mendapatkan koordinat GPS
                   </p>
                 </div>
@@ -325,8 +328,7 @@ export default {
           typeof val === "object"
         ) {
           if (!val.district_code) err[key] = "Kecamatan wajib dipilih";
-          else if (!val.village_code)
-            err[key] = "Desa/Kelurahan wajib dipilih";
+          else if (!val.village_code) err[key] = "Desa/Kelurahan wajib dipilih";
         }
       });
       return err;
