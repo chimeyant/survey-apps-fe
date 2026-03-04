@@ -17,7 +17,7 @@
       />
       <span
         v-if="label"
-        class="ml-2 text-sm text-gray-700"
+        class="ml-2 text-sm text-gray-900 font-medium"
         :class="{ 'text-gray-500': disabled }"
       >
         {{ label }}

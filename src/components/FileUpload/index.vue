@@ -53,7 +53,7 @@
       >
         <input
           type="text"
-          class="w-full focus:outline-none text-sm disabled:bg-white"
+          class="w-full focus:outline-none text-sm text-gray-900 placeholder:text-gray-500 disabled:bg-white"
           :placeholder="placeholder"
           disabled
           v-model="filename"
@@ -385,7 +385,7 @@ export default {
 
     // Label classes
     const labelClasses = computed(() => {
-      const baseClasses = "text-sm font-medium text-gray-700";
+      const baseClasses = "text-sm font-medium text-gray-900";
       
       if (props.labelPosition === "inline") {
         return [

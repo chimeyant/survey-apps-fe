@@ -131,7 +131,7 @@
               class="px-12 py-3 text-lg blok"
               @click.prevent="kirimSurvei"
             >
-              Kirim Survei OKE
+              Kirim Survei
             </UButton>
           </div>
         </form>

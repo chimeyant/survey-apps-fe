@@ -21,7 +21,7 @@
       ></span>
       <!-- Label for the switch -->
     </label>
-    <span class="ml-2 text-gray-700 text-sm">{{ label }}</span>
+    <span class="ml-2 text-sm font-medium text-gray-900">{{ label }}</span>
   </div>
 </template>
 

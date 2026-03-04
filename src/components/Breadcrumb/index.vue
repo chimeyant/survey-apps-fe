@@ -1,79 +1,82 @@
 <template>
-  <div class="pb-4">
-    <nav
-      class="flex"
-      aria-label="Breadcrumb"
-    >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
-        <li class="inline-flex items-center">
-          <a
-            href="#"
-            @click=""
-            class="text-gray-700 hover:text-gray-900 inline-flex items-center"
-          >
-            <i class="ri-dashboard-2-fill text-2xl"></i>
-
-          </a>
-        </li>
-        <li
-          v-for="(breadcrumb, index) in breadcrumbs"
-          :key="breadcrumb.name"
+  <nav
+    v-if="hasItems"
+    class="flex items-center py-3 text-sm"
+    aria-label="Breadcrumb"
+  >
+    <ol class="inline-flex flex-wrap items-center gap-1.5 text-gray-500 min-w-0">
+      <!-- Home -->
+      <li class="inline-flex items-center shrink-0">
+        <router-link
+          :to="homeRoute"
+          class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-1"
+          aria-label="Beranda"
         >
-          <div class="flex items-center">
-            <svg
-              class="w-6 h-6 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            <a
-              href="#"
-              @click="router.push({name: breadcrumb.name })"
-              class="text-gray-700 hover:text-gray-900 ml-1 md:ml-2 text-sm font-medium"
-              :class="{
-                'text-xs font-semibold text-teal-500' : index == breadcrumbs.length -1
-              }"
-            >{{ breadcrumb.title }}</a>
-          </div>
+          <i class="ri-home-4-line text-lg"></i>
+        </router-link>
+      </li>
+
+      <template v-for="(crumb, index) in breadcrumbs" :key="crumb.name || index">
+        <!-- Separator -->
+        <li
+          class="flex items-center shrink-0 text-gray-300 pointer-events-none"
+          aria-hidden="true"
+        >
+          <i class="ri-arrow-right-s-line text-base"></i>
         </li>
-      </ol>
-    </nav>
-  </div>
+        <!-- Crumb -->
+        <li class="inline-flex items-center min-w-0">
+          <router-link
+            v-if="!isLast(index)"
+            :to="{ name: crumb.name }"
+            class="rounded-lg px-2 py-1.5 text-gray-600 hover:bg-gray-100 hover:text-gray-900 truncate max-w-[180px] sm:max-w-[240px] transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-1"
+          >
+            {{ crumb.title }}
+          </router-link>
+          <span
+            v-else
+            class="rounded-lg px-2 py-1.5 font-semibold text-gray-900 truncate max-w-[180px] sm:max-w-[240px]"
+            aria-current="page"
+          >
+            {{ crumb.title }}
+          </span>
+        </li>
+      </template>
+    </ol>
+  </nav>
 </template>
 
 <script>
-import { useRouter } from "vue-router";
-import { useAppStore } from "@/store/app";
-import { ref, watch } from "vue";
+import { computed } from "vue";
 
 export default {
+  name: "UBreadcrumb",
   props: {
     breadcrumbs: {
       type: Array,
-      default: [],
+      default: () => [],
+    },
+    homeName: {
+      type: String,
+      default: "dashboard",
     },
   },
-  setup(props, { emit }) {
-    const store = useAppStore();
-    const router = useRouter();
-    const breadcrumbs = ref(props.breadcrumbs);
-
-    watch(
-      () => props.breadcrumbs,
-      (newVal) => {
-        breadcrumbs.value = newVal;
-      }
+  setup(props) {
+    const breadcrumbs = computed(() =>
+      Array.isArray(props.breadcrumbs) ? props.breadcrumbs : []
     );
 
+    const hasItems = computed(() => breadcrumbs.value.length > 0);
+
+    const homeRoute = computed(() => ({ name: props.homeName }));
+
+    const isLast = (index) => index === breadcrumbs.value.length - 1;
+
     return {
-      router,
       breadcrumbs,
+      hasItems,
+      homeRoute,
+      isLast,
     };
   },
 };

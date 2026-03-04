@@ -1,78 +1,94 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-700 via-cyan-900 to-cyan-950 animate-fadeIn transition-all duration-100">
-    <div class="max-w-md w-full mx-4">
+  <div class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased flex items-center justify-center">
+    <!-- Decorative background (sama seperti home-page) -->
+    <div
+      class="fixed inset-0 overflow-hidden pointer-events-none"
+      aria-hidden="true"
+    >
+      <div class="absolute -top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full bg-cyan-500/10 blur-3xl" />
+      <div class="absolute top-[60%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-3xl" />
+      <div class="absolute top-[20%] left-[30%] w-[40%] h-[40%] rounded-full bg-teal-500/5 blur-2xl" />
+    </div>
+
+    <div class="relative z-10 w-full max-w-md mx-4">
       <!-- Login Card -->
-      <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div class="rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-2xl shadow-black/20 p-8">
         <!-- Logo and Title -->
-        <div class="text-center mb-5">
-          <div class="flex justify-center items-center mb-2">
-            <div class="w-[200px] h-[200px]">
+        <div class="text-center mb-6">
+          <div class="flex justify-center items-center mb-4">
+            <div class="w-32 h-32 rounded-2xl flex items-center justify-center overflow-hidden">
               <img
-                src="/sms.png"
-                alt="LOGO SIMPELIN"
-                class="w-full h-full object-contain"
+                src="/sms-transparent.png"
+                alt="Logo"
+                class="w-full h-full object-contain p-2 bg-white rounded-2xl"
               >
             </div>
-            <div class="text-cyan font-bold  italic tracking-wide ml-2"></div>
           </div>
-          <div class="text-sm text-cyan-600 mb-6">
-            Silahkan masukan email dan kata sandi Anda untuk melanjutkan
-          </div>
+          <h1 class="text-xl font-bold text-white tracking-tight mb-1">
+            Masuk Admin
+          </h1>
+          <p class="text-sm text-slate-400">
+            Masukkan email dan kata sandi Anda untuk melanjutkan
+          </p>
         </div>
 
         <!-- Error Message -->
         <div
           v-show="errstatus"
-          class="w-full border-l-red-500 border-l-4 p-3 mb-6 text-sm text-cyan-900 bg-red-50 rounded-md transition-all duration-200"
+          class="w-full border border-rose-500/50 bg-rose-500/10 rounded-xl p-3 mb-5 text-sm text-rose-400 flex items-center gap-2 transition-all duration-200"
           role="alert"
         >
-          <i class="ri-error-warning-fill red  px-2 text-xl"></i> 
-          <span class="font-medium">Error..! </span> {{ errmessage }}.
+          <i class="ri-error-warning-fill text-lg flex-shrink-0"></i>
+          <span class="font-medium">Error:</span> {{ errmessage }}
         </div>
 
         <!-- Login Form -->
-        <form @submit.prevent="postSignin" class="space-y-6">
+        <form
+          @submit.prevent="postSignin"
+          class="space-y-5"
+        >
           <!-- Email Input -->
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="ri-mail-line text-cyan-500"></i>
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-mail-line text-slate-500 text-lg"></i>
             </div>
             <input
               type="email"
               v-model="email"
-              class="w-full pl-10 pr-4 py-3 border border-cyan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 bg-cyan-50/30"
-              placeholder="Masukan Email Anda..."
+              class="w-full h-12 pl-11 pr-4 rounded-xl bg-slate-800/80 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+              placeholder="Masukkan email Anda..."
               required
             >
           </div>
 
           <!-- Password Input -->
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="ri-lock-password-line text-cyan-500"></i>
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-lock-password-line text-slate-500 text-lg"></i>
             </div>
             <input
               :type="showpassword ? 'text' : 'password'"
               v-model="password"
-              class="w-full pl-10 pr-12 py-3 border border-cyan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 bg-cyan-50/30"
-              placeholder="Masukan Kata Sandi Anda"
+              class="w-full h-12 pl-11 pr-12 rounded-xl bg-slate-800/80 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+              placeholder="Masukkan kata sandi"
               required
             >
             <button
               type="button"
               @click="setShowPassword"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-cyan-400 transition-colors"
+              aria-label="Toggle password visibility"
             >
               <i
                 :class="showpassword ? 'ri-eye-off-line' : 'ri-eye-line'"
-                class="text-cyan-500 hover:text-cyan-700 transition-colors duration-200"
+                class="text-lg"
               ></i>
             </button>
           </div>
 
           <!-- Forgot Password -->
           <div class="flex justify-end">
-            <span class="text-sm text-cyan-600 hover:text-cyan-800 hover:cursor-pointer transition-colors duration-200">
+            <span class="text-sm text-slate-400 hover:text-cyan-400 cursor-pointer transition-colors">
               Lupa kata sandi?
             </span>
           </div>
@@ -80,22 +96,34 @@
           <!-- Login Button -->
           <button
             type="submit"
-            class="w-full bg-gradient-to-r from-cyan-500 via-cyan-600 to-cyan-700 hover:from-cyan-600 hover:to-cyan-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 shadow-cyan-200/40 shadow-md"
+            class="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all flex items-center justify-center gap-2"
           >
-            <span class="tracking-wider">MASUK</span>
+            <i class="ri-login-box-line text-xl"></i>
+            <span class="tracking-wide">MASUK</span>
           </button>
         </form>
 
         <!-- Additional Info -->
-        <div class="mt-8 text-center">
-          <p class="text-sm text-gray-600">
-            Belum punya akun? 
-            <span class="text-cyan-600 hover:text-cyan-800 hover:cursor-pointer font-medium">
-              Daftar disini
+        <div class="mt-6 pt-6 border-t border-slate-700/50 text-center">
+          <p class="text-sm text-slate-400">
+            Belum punya akun?
+            <span class="text-cyan-400 hover:text-cyan-300 cursor-pointer font-medium transition-colors">
+              Daftar di sini
             </span>
           </p>
         </div>
       </div>
+
+      <!-- Back to home -->
+      <p class="text-center mt-6">
+        <a
+          href="/"
+          class="text-sm text-slate-500 hover:text-cyan-400 transition-colors"
+        >
+          <i class="ri-arrow-left-line align-middle mr-1"></i>
+          Kembali ke beranda
+        </a>
+      </p>
     </div>
   </div>
 </template>
@@ -117,25 +145,22 @@ export default {
     const showpassword = ref(false);
 
     const postSignin = async () => {
-      // Reset error state
       errstatus.value = false;
       errmessage.value = "";
 
-      // Validation
       if (!email.value || email.value.trim() === "") {
-        setError("Email tidak boleh kosong...!");
+        setError("Email tidak boleh kosong.");
         return;
       }
 
       if (!password.value || password.value.trim() === "") {
-        setError("Kata Sandi tidak boleh kosong...!");
+        setError("Kata sandi tidak boleh kosong.");
         return;
       }
 
-      // Email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email.value)) {
-        setError("Format email tidak valid...!");
+        setError("Format email tidak valid.");
         return;
       }
 
@@ -145,15 +170,15 @@ export default {
       };
 
       try {
-        const result = await store.postSignin(payload,true);
-        
+        const result = await store.postSignin(payload, true);
+
         if (result) {
           router.push({ name: "dashboard" });
         } else {
-          setError("Email atau kata sandi tidak benar...!");
+          setError("Email atau kata sandi tidak benar.");
         }
       } catch (error) {
-        setError("Terjadi kesalahan saat login...!");
+        setError("Terjadi kesalahan saat login.");
       }
     };
 
@@ -164,13 +189,12 @@ export default {
     const setError = (message) => {
       errstatus.value = true;
       errmessage.value = message;
-
       setTimeout(() => {
         errstatus.value = false;
         errmessage.value = "";
       }, 5000);
     };
-    
+
     const loginWithSSO = () => {
       window.location.href = "https://pintu-umah.bantenprov.go.id/";
     };
@@ -197,11 +221,11 @@ export default {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-</style> 
+</style>

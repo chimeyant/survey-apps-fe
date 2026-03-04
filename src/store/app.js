@@ -21,7 +21,7 @@ export const useAppStore = defineStore("app", {
         menus: [],
         theme: {
             mode: "light",
-            current: "cyan",
+            current: "indigo",
             available: Object.keys(THEMES),
         },
         http: apiService,

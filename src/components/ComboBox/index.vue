@@ -43,11 +43,11 @@
         :aria-describedby="error ? `${inputId}-error` : undefined"
       >
         <div class="flex justify-between items-center">
-          <span :class="{ 'text-gray-400': !selectedText }">
+          <span :class="selectedText ? 'text-gray-900' : 'text-gray-500'">
             {{ selectedText || placeholder || 'Pilih Opsi' }}
           </span>
           <i :class="[
-            'ri-arrow-down-s-line transition-transform duration-200',
+            'ri-arrow-down-s-line transition-transform duration-200 text-gray-600',
             { 'rotate-180': isOpen }
           ]"></i>
         </div>
@@ -80,8 +80,8 @@
               'px-3 py-2 cursor-pointer text-sm transition-colors duration-150',
               {
                 'bg-cyan-500 text-white': isSelected(option),
-                'bg-gray-100': focusedIndex === index && !isSelected(option),
-                'hover:bg-cyan-100': !isSelected(option)
+                'bg-gray-100 text-gray-900': focusedIndex === index && !isSelected(option),
+                'hover:bg-cyan-100 hover:text-gray-900 text-gray-900': !isSelected(option)
               }
             ]"
               role="option"

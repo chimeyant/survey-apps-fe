@@ -1,31 +1,40 @@
 <template>
   <div class="relative inline-block text-left" ref="dropdownRef">
-    <!-- Dropdown Button -->
     <button
-      @click="toggleDropdown"
-      :aria-expanded="isDropdownOpen.toString()"
-      aria-haspopup="listbox"
-      :class="`inline-flex justify-center items-center w-[24px] h-[24px] text-sm font-medium text-white bg-${themeColors.primary}-600 rounded-full hover:bg-${themeColors.primary}-700 focus:outline-none focus:ring-2 focus:ring-${themeColors.primary}-500 transition`"
       type="button"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+      :aria-expanded="isDropdownOpen"
+      aria-haspopup="menu"
+      aria-label="Buka menu aksi"
       tabindex="0"
+      @click="toggleDropdown"
       @keydown.enter.prevent="toggleDropdown"
       @keydown.space.prevent="toggleDropdown"
       @keydown.esc="closeDropdown"
     >
-      <span class="sr-only">Open options</span>
-      <i class="ri-more-2-fill"></i>
+      <i class="ri-more-2-fill text-lg"></i>
     </button>
 
-    <!-- Dropdown Menu -->
-    <transition name="fade">
+    <transition
+      enter-active-class="transition ease-out duration-100"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition ease-in duration-75"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
       <div
         v-if="isDropdownOpen"
-        :class="`absolute right-0 z-20 w-auto mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 min-w-[120px]`"
-        role="listbox"
-        @keydown.esc="closeDropdown"
+        :class="[
+          'absolute right-0 z-30 mt-1.5 origin-top-right rounded-lg border border-gray-200 bg-white py-1 shadow-lg focus:outline-none',
+          menuWidth
+        ]"
+        role="menu"
+        aria-orientation="vertical"
         @mouseleave="closeDropdown"
+        @keydown.esc="closeDropdown"
       >
-        <div class="flex flex-col items-start p-2" @click="closeDropdown">
+        <div class="py-0.5" role="none" @click="closeDropdown">
           <slot name="menu" />
         </div>
       </div>
@@ -34,18 +43,20 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { useAppStore } from "@/store/app";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
 export default {
-  name: "DropdownOpsi",
-  setup() {
+  name: "UDropdownOpsi",
+  props: {
+    /** Tailwind width class untuk panel dropdown, contoh: min-w-[160px], w-64, w-72, max-w-xs */
+    menuWidth: {
+      type: String,
+      default: "min-w-[160px]",
+    },
+  },
+  setup(props) {
     const isDropdownOpen = ref(false);
     const dropdownRef = ref(null);
-
-    // Ambil warna tema dari store
-    const store = useAppStore();
-    const themeColors = computed(() => store.getThemeColors);
 
     const toggleDropdown = () => {
       isDropdownOpen.value = !isDropdownOpen.value;
@@ -55,12 +66,8 @@ export default {
       isDropdownOpen.value = false;
     };
 
-    // Click outside handler
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.value &&
-        !dropdownRef.value.contains(event.target)
-      ) {
+      if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
         closeDropdown();
       }
     };
@@ -80,19 +87,8 @@ export default {
       toggleDropdown,
       closeDropdown,
       dropdownRef,
-      themeColors,
+      menuWidth: props.menuWidth,
     };
   },
 };
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

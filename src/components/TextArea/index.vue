@@ -341,7 +341,7 @@ export default {
 
     // Label classes
     const labelClasses = computed(() => {
-      const baseClasses = "text-sm font-medium text-gray-700";
+      const baseClasses = "text-sm font-medium text-gray-900";
       
       if (props.labelPosition === "inline") {
         return [
@@ -376,7 +376,7 @@ export default {
 
     // TextArea classes
     const textareaClasses = computed(() => {
-      const baseClasses = "block w-full rounded-md shadow-sm focus:outline-none focus:ring-0 focus:ring-cyan-500 focus:border-cyan-500 transition-colors duration-200";
+      const baseClasses = "block w-full rounded-md shadow-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-0 focus:ring-cyan-500 focus:border-cyan-500 transition-colors duration-200";
       
       const stateClasses = [];
       

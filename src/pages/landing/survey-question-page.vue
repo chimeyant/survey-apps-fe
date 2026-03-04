@@ -1,18 +1,25 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl mx-auto">
+  <div class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased py-12 px-4 sm:px-6 lg:px-8">
+    <!-- Decorative background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      <div class="absolute -top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full bg-cyan-500/10 blur-3xl" />
+      <div class="absolute top-[60%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-3xl" />
+      <div class="absolute top-[20%] left-[30%] w-[40%] h-[40%] rounded-full bg-teal-500/5 blur-2xl" />
+    </div>
+
+    <div class="relative z-10 max-w-5xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        <h1 class="text-4xl font-bold text-white mb-4">
           {{ surveyInfo.name }}
         </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
           {{ surveyInfo.description }}
         </p>
       </div>
 
-      <!-- Survey Form - Implementasi formulir manajemen pertanyaan -->
-      <div class="bg-white rounded-lg shadow-xl p-8 min-h-[70vh]">
+      <!-- Survey Form -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 min-h-[70vh]">
         <form
           @submit.prevent="submitSurvey"
           class="space-y-6"
@@ -103,7 +110,7 @@
                       class="text-red-500"
                     >*</span>
                   </label>
-                  <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                  <div class="border border-gray-300 rounded-xl p-4 bg-gray-50">
                     <UMapCoordinatePicker
                       v-model="coordinates"
                       @update:modelValue="onLocationChange"
@@ -134,7 +141,7 @@
               <UButton
                 type="submit"
                 :loading="isSubmitting"
-                class="px-12 py-3 text-lg"
+                class="px-12 py-3 text-lg bg-gradient-to-r from-cyan-500 to-indigo-500 text-white border-0 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-white"
                 @click.prevent="submitSurvey"
               >
                 Kirim Survei
@@ -145,28 +152,28 @@
       </div>
 
       <!-- Tips -->
-      <div class="mt-8 bg-blue-50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-blue-900 mb-3">
+      <div class="mt-8 bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+        <h3 class="text-lg font-semibold text-cyan-400 mb-3">
           💡 Tips Mengisi Survei
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-400">
           <div>
-            <p class="font-medium mb-2">📍 Lokasi GPS:</p>
-            <ul class="space-y-1">
+            <p class="font-medium text-slate-300 mb-2">📍 Lokasi GPS:</p>
+            <ul class="space-y-1 text-slate-400">
               <li>• Gunakan tombol "Lokasi Saat Ini" untuk akurasi terbaik</li>
               <li>• Klik di peta untuk memilih lokasi</li>
             </ul>
           </div>
           <div>
-            <p class="font-medium mb-2">🏠 Lokasi Alamat:</p>
-            <ul class="space-y-1">
+            <p class="font-medium text-slate-300 mb-2">🏠 Lokasi Alamat:</p>
+            <ul class="space-y-1 text-slate-400">
               <li>• Pilih Kecamatan terlebih dahulu</li>
               <li>• Lalu pilih Desa/Kelurahan</li>
             </ul>
           </div>
           <div>
-            <p class="font-medium mb-2">📋 Data:</p>
-            <ul class="space-y-1">
+            <p class="font-medium text-slate-300 mb-2">📋 Data:</p>
+            <ul class="space-y-1 text-slate-400">
               <li>• Isi semua field yang bertanda *</li>
               <li>• Periksa kembali sebelum kirim</li>
             </ul>

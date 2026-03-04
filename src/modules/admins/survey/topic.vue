@@ -1,120 +1,89 @@
 <template>
-  <div class="flex flex-col mt-4 w-full min-h-full animate-fadeIn ">
+  <div class="flex flex-col w-full min-h-full">
     <UFormDataTable
-      title="Daftar Topik"
+      title="Daftar Topik Survey"
       @onRefresh="fetchRecords({})"
       @onAdd="addNew"
-      v-model:keyword="keyWord"
+      v-model:keyWord="keyWord"
     >
-      <template v-slot:data-table>
-        <!-- U Data Table -->
+      <template #data-table>
         <UDataTable
           :headers="headers"
           @update:options="fetchRecords"
         >
-          <template v-slot:body>
+          <template #body>
             <tr
-              class="hover:bg-gray-100 text-sm"
-              v-for="item in records"
+              v-for="(item, index) in records"
+              :key="item.uuid || item.id || index"
+              class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              <td class="px-4 py-2 border border-gray-300">
-                <input
-                  type="checkbox"
-                  class="bg-yellow-500 text-red-700"
-                >
+              <td class="px-4 py-3 text-center text-sm text-gray-500 w-14">
+                {{ table.footer?.itemsPerPage * (table.footer?.currentPage - 1) + index + 1 }}
               </td>
-              <td class="px-4 py-2 border border-gray-300 ">{{ item.name }}</td>
-              <td class="px-4 py-2 border border-gray-300 text-center">
-                <span>
-                  {{ item.start_date }} s/d {{ item.end_date }}
-                </span>
+              <td class="px-4 py-3 text-sm text-gray-900 max-w-[200px]">
+                <span class="font-medium line-clamp-2">{{ item.name }}</span>
               </td>
-              <td class="px-4 py-2 border border-gray-300 text-center">
+              <td class="px-4 py-3 text-center text-sm text-gray-600 whitespace-nowrap">
+                {{ item.start_date }} – {{ item.end_date }}
+              </td>
+              <td class="px-4 py-3 text-center">
                 <span
-                  v-show="item.is_token"
-                  class="font-bold text-green-500"
-                >{{ item.token }}</span>
+                  v-if="item.is_token"
+                  class="font-mono text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded"
+                >{{ item.token || '—' }}</span>
                 <span
-                  v-show="!item.is_token"
-                  class="font-bold text-red-500"
-                >Tidak Aktif</span>
+                  v-else
+                  class="text-xs text-gray-500"
+                >Tidak aktif</span>
               </td>
-              <td class="px-4 py-2 border border-gray-300 text-center">
+              <td class="px-4 py-3 text-center">
                 <button
                   type="button"
-                  class="focus:outline-none"
+                  class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                   @click="openQrModal(item.uuid)"
                 >
-                  <UChip
-                    label="Download QR Code"
-                    color="info"
-                  />
+                  <i class="ri-qr-code-line text-base"></i>
+                  QR Code
                 </button>
               </td>
-              <td class="px-4 py-2 border border-gray-300 text-center">
-                <UChip
-                  :label="item.status ? 'Aktif' : 'Tidak Aktif'"
-                  :color="item.status ? 'success' : 'error'"
-                />
+              <td class="px-4 py-3 text-center">
+                <span
+                  :class="item.status ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'"
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                >
+                  {{ item.status ? 'Aktif' : 'Nonaktif' }}
+                </span>
               </td>
-              <td class="px-4 py-2 border border-gray-300 text-center">
+              <td class="px-4 py-3 text-right">
                 <UDropdownOpsi>
-                  <template v-slot:menu>
-                    <div
-                      v-if="false"
-                      class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                    >
-                      <button
-                        class="flex justify-center items-center"
-                        @click="showCategoryPage(item.uuid)"
-                      >
-                        <i class="ri-puzzle-line text-lg text-green-500 mr-1"></i><span class="text-gray-700">Atur Kategori</span>
-                      </button>
-                    </div>
-                    <div
-                      v-if="false"
-                      class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
-                    >
-                      <button
-                        class="flex justify-center items-center"
-                        @click="showDocumentPage(item.uuid)"
-                      >
-                        <i class="ri-attachment-fill text-lg text-blue-500 mr-1"></i><span class="text-gray-700">Dokumen Persyaratan</span>
-                      </button>
-                    </div>
-                    <div
+                  <template #menu>
+                    <button
                       v-if="page.actions.edit"
-                      class="flex w-[200px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                      @click="showTopicQuestionPage(item.uuid)"
                     >
-                      <button
-                        class="flex justify-center items-center"
-                        @click="showTopicQuestionPage(item.uuid)"
-                      >
-                        <i class="ri-article-line text-lg text-purple-500 mr-1"></i><span class="text-gray-700">Template Formulir Survey</span>
-                      </button>
-                    </div>
-                    <div
+                      <i class="ri-article-line text-lg text-indigo-600"></i>
+                      <span>Template Formulir Survey</span>
+                    </button>
+                    <button
                       v-if="page.actions.edit"
-                      class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                      @click="showRecord(item.uuid)"
                     >
-                      <button
-                        class="flex justify-center items-center"
-                        @click="showRecord(item.uuid)"
-                      >
-                        <i class="ri-edit-circle-fill text-lg text-orange-500 mr-1"></i><span class="text-gray-700">Ubah Data</span>
-                      </button>
-                    </div>
-                    <div
+                      <i class="ri-edit-line text-lg text-amber-600"></i>
+                      <span>Ubah</span>
+                    </button>
+                    <button
                       v-if="page.actions.delete"
-                      class="flex w-[140px] justify-start items-center hover:cursor-pointer hover:bg-gray-100 px-1 rounded-lg"
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      @click="postConfirmDelete(item.uuid)"
                     >
-                      <button
-                        class="flex justify-center items-center"
-                        @click="postConfirmDelete(item.uuid)"
-                      >
-                        <i class="ri-delete-bin-2-fill text-lg text-red-500 mr-1"></i><span class="text-gray-700">Hapus Data</span>
-                      </button>
-                    </div>
+                      <i class="ri-delete-bin-line text-lg"></i>
+                      <span>Hapus</span>
+                    </button>
                   </template>
                 </UDropdownOpsi>
               </td>
@@ -124,242 +93,213 @@
       </template>
     </UFormDataTable>
 
-    <!-- Form Slider -->
-    <div
-      v-if="false"
-      class="flex flex-col h-full w-full animate-fadeIn"
-    >
-      <div class="lg:w-full h-[48px] bg-teal-700 rounded-t-md ">
-        <div class="flex justify-between items-center h-full w-full px-5">
-          <div class="text-white">
-            Formulir Manajemen Pengguna
-          </div>
-          <div class="flex gap-x-3">
-            <div class="text-white text-2xl">
-              <i class="ri-close-circle-fill"></i>
-              <i class="ri-question-fill"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Form Dialog -->
-
     <UFormDialog
-      title="Formulir Manajemen Topik"
+      title="Formulir Topik Survey"
       @onSave="postRecord"
       @onUpdate="postUpdate"
     >
-      <template v-slot:formdata>
-        <!-- Name Field -->
-        <div>
-          <div class="mb-4">
+      <template #formdata>
+        <div class="space-y-4">
+          <div>
             <UTextField
-              label="Topik"
               v-model="record.name"
+              label="Nama Topik"
+              placeholder="Nama topik survey"
               required
             />
           </div>
-          <div class="mb-4">
+          <div>
             <UTextArea
-              label="Penjelasan Singkat"
               v-model="record.description"
+              label="Penjelasan Singkat"
+              placeholder="Deskripsi topik"
               required
             />
           </div>
-          <div class="grid grid-cols-2 gap-x-1">
-            <div class="mb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <UTextField
-                label="Dari Tanggal"
                 v-model="record.start_date"
-                required
+                label="Dari Tanggal"
                 type="date"
+                required
               />
             </div>
-            <div class="mb-4">
+            <div>
               <UTextField
-                label="Sampai Tanggal"
                 v-model="record.end_date"
-                required
+                label="Sampai Tanggal"
                 type="date"
+                required
               />
             </div>
-            <div class="mb-4">
+            <div>
               <UTextField
-                label="Jam Mulai"
                 v-model="record.start_time"
+                label="Jam Mulai"
                 type="time"
               />
             </div>
-            <div class="mb-4">
+            <div>
               <UTextField
-                label="Jam Selesai"
                 v-model="record.end_time"
+                label="Jam Selesai"
                 type="time"
               />
             </div>
           </div>
-          <div class="mb-4">
+          <div>
             <USwitch
-              label="Aktifkan Token"
               v-model="record.is_token"
+              label="Aktifkan Token"
             />
           </div>
-
-          <div class="mb-4">
+          <div>
             <USwitch
-              label="Aktif"
               v-model="record.status"
+              label="Status aktif"
             />
           </div>
         </div>
       </template>
     </UFormDialog>
 
-    <!-- Form Delete -->
     <UFormDelete @delete="postDelete" />
-    <!-- QR Preview Modal -->
-    <div
-      v-if="showQrModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-    >
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
-        <button
-          type="button"
-          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          @click="closeQrModal"
+
+    <!-- QR Modal -->
+    <teleport to="body">
+      <transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showQrModal"
+          class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="qr-modal-title"
         >
-          <i class="ri-close-circle-fill text-2xl"></i>
-        </button>
-        <div class="space-y-3 text-center mb-6">
-          <h3 class="text-xl font-semibold text-gray-800">
-            {{ qrMeta.name || "QR Survey Topic" }}
-          </h3>
-          <p class="text-sm text-gray-600">
-            {{ qrMeta.description || "Scan QR untuk membuka survei." }}
-          </p>
-        </div>
-        <div class="min-h-[300px] flex items-center justify-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
           <div
-            v-if="qrLoading"
-            class="text-gray-500 text-sm"
-          >Menyiapkan QR Code...</div>
-          <img
-            v-else-if="qrPreview"
-            :src="qrPreview"
-            alt="QR Preview"
-            class="max-h-[360px] object-contain"
-          >
-          <div
-            v-else
-            class="text-red-500 text-sm"
-          >QR Code tidak tersedia.</div>
-        </div>
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+            class="absolute inset-0 bg-black/50"
+            aria-hidden="true"
             @click="closeQrModal"
+          />
+          <div
+            class="relative w-full max-w-lg rounded-xl bg-white shadow-xl overflow-hidden"
+            role="document"
           >
-            Tutup
-          </button>
-          <button
-            type="button"
-            class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-            :disabled="qrLoading || !qrMeta.url"
-            @click="openLink"
-          >
-            Buka Link
-          </button>
-          <button
-            type="button"
-            class="px-4 py-2 rounded-md bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-50"
-            :disabled="qrLoading || !qrPreview"
-            @click="downloadQr"
-          >
-            Download
-          </button>
+            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 bg-gray-50">
+              <h2 id="qr-modal-title" class="text-lg font-semibold text-gray-900">
+                {{ qrMeta.name || "QR Survey" }}
+              </h2>
+              <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Tutup"
+                @click="closeQrModal"
+              >
+                <i class="ri-close-line text-xl"></i>
+              </button>
+            </div>
+            <div class="p-5 space-y-4">
+              <p v-if="qrMeta.description" class="text-sm text-gray-600">
+                {{ qrMeta.description }}
+              </p>
+              <div class="flex items-center justify-center min-h-[280px] rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <div v-if="qrLoading" class="text-sm text-gray-500 flex items-center gap-2">
+                  <i class="ri-loader-4-line animate-spin text-lg"></i>
+                  Menyiapkan QR Code...
+                </div>
+                <img
+                  v-else-if="qrPreview"
+                  :src="qrPreview"
+                  alt="QR Code"
+                  class="max-h-[320px] w-auto object-contain"
+                />
+                <div v-else class="text-sm text-red-600">
+                  QR Code tidak tersedia.
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                @click="closeQrModal"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                :disabled="qrLoading || !qrMeta.url"
+                @click="openLink"
+              >
+                Buka Link
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+                :disabled="qrLoading || !qrPreview"
+                @click="downloadQr"
+              >
+                <i class="ri-download-line mr-1.5 align-middle"></i>
+                Download
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </transition>
+    </teleport>
   </div>
 </template>
-  
-  <script>
+
+<script>
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
 import { computed, onMounted, ref, watch } from "vue";
 import {
-  UComboBox,
-  USwitch,
   UDataTable,
   UDropdownOpsi,
   UFormDelete,
   UFormDialog,
   UFormDataTable,
-  UFileUpload,
-  UTextField,
   UTextArea,
-  UChip,
+  UTextField,
+  USwitch,
 } from "@/components";
 import { debounce } from "lodash";
 
 export default {
+  name: "SurveyTopicModule",
   components: {
-    UComboBox,
-    USwitch,
     UDataTable,
     UDropdownOpsi,
     UFormDelete,
     UFormDialog,
     UFormDataTable,
-    UFileUpload,
-    UTextField,
     UTextArea,
-    UChip,
+    UTextField,
+    USwitch,
   },
   setup() {
     const store = useAppStore();
     const router = useRouter();
-    const device = computed(() => store.device);
-    const theme = computed(() => store.getTheme);
-    const types = computed(() => store.types);
     const page = computed(() => store.page);
     const form = computed(() => store.form);
     const colors = computed(() => store.colors);
+    const types = computed(() => store.types);
     const table = computed(() => store.table);
-    const list = computed(() => store.lists);
-    const rules = computed(() => store.rules);
     const record = computed(() => store.record);
     const records = computed(() => store.records);
+
     const endpoint = "api/v1/survey/survey-topics";
+    const keyWord = ref("");
 
-    const winheight = window.innerHeight - 320;
-    const headers = [
-      { title: "#", key: "ids", align: "center", width: "45px" },
-      { title: "Topik", key: "name", align: "start", width: "300px" },
-      { title: "Waktu", key: "name", align: "center", width: "150px" },
-      { title: "Token", key: "name", align: "center", width: "150px" },
-      { title: "Link Formulir", key: "name", align: "center", width: "200px" },
-      { title: "Status", key: "status", align: "center", width: "150px" },
-      {
-        title: "Aksi",
-        key: "id",
-        align: "center",
-        width: "50px",
-        sortable: false,
-      },
-    ];
-
-    /**
-     * Variable Page
-     */
-    const isChecked = ref(false);
-    const isOpen = ref(false);
-    const selectedOption = ref(null);
-    const keyWord = ref(null);
     const showQrModal = ref(false);
     const qrPreview = ref(null);
     const qrLoading = ref(false);
@@ -370,259 +310,152 @@ export default {
       url: "",
     });
 
-    /**
-     * Function Page
-     */
+    const headers = [
+      { title: "#", key: "ids", align: "center", width: "50px" },
+      { title: "Topik", key: "name", align: "start", width: "200px" },
+      { title: "Periode", key: "date", align: "center", width: "140px" },
+      { title: "Token", key: "token", align: "center", width: "120px" },
+      { title: "QR", key: "qr", align: "center", width: "100px" },
+      { title: "Status", key: "status", align: "center", width: "90px" },
+      { title: "Aksi", key: "id", align: "end", width: "80px", sortable: false },
+    ];
+
     const addNew = () => {
       store.setRecord({});
-      store.setForm({
-        add: true,
-        edit: false,
-      });
+      store.setForm({ add: true, edit: false });
     };
 
-    /**
-     * Fetc Records Data From Service
-     * @param payload
-     */
-    const fetchRecords = async (payload) => {
+    const fetchRecords = async (payload = {}) => {
       const params = {
-        page: payload ? payload.page : 1,
-        itemsPerPage: payload.itemsPerPage ? payload.itemsPerPage : 10,
-        keyWord: payload ? payload.keyWord : null,
+        page: payload.page ?? 1,
+        itemsPerPage: payload.itemsPerPage ?? table.value.footer?.itemsPerPage ?? 10,
+        keyWord: (payload.keyWord ?? payload.keyword) ?? keyWord.value ?? null,
       };
-
       const result = await store.fetchRecords(endpoint, params, true);
-
-      store.setRecords(result?.data.data ? result.data.data : []);
-      table.value.totalItems = result?.data.meta.total;
+      store.setRecords(result?.data?.data ?? []);
+      if (result?.data?.meta) {
+        table.value.footer.totalItems = result.data.meta.total;
+        table.value.footer.total = result.data.meta.total;
+        table.value.footer.currentPage = result.data.meta.current_page;
+        table.value.footer.lastPage = result.data.meta.last_page;
+        table.value.footer.firstPage = result.data.meta.first_page ?? 1;
+      }
     };
 
-    /**
-     * Post data record to store data
-     */
     const postRecord = async () => {
-      const result = await store.postRecord(
-        endpoint,
-        record.value,
-        "store",
-        true
-      );
-
-      if (result?.data.status) {
-        store.setSnackbar(
-          result.data.message,
-          colors.value.SUCCESS,
-          types.value.SUCCESS
-        );
-        store.setForm({
-          add: false,
-          edit: false,
-        });
+      const result = await store.postRecord(endpoint, record.value, "store", true);
+      if (result?.data?.status) {
+        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setForm({ add: false, edit: false });
         records.value.push(result.data.data);
       }
     };
 
-    /**
-     * Show data record for preparing edit data
-     * @param payload
-     */
-    const showRecord = async (payload) => {
-      const result = await store.showRecord(endpoint + "/" + payload, true);
-      store.setRecord(result.data);
-      store.setForm({
-        add: true,
-        edit: true,
-      });
+    const showRecord = async (uuid) => {
+      const result = await store.showRecord(`${endpoint}/${uuid}`, true);
+      store.setRecord(result?.data ?? result ?? {});
+      store.setForm({ add: true, edit: true });
     };
 
-    /**
-     * Post Update Data To Server
-     */
     const postUpdate = async () => {
       const result = await store.postRecord(
-        endpoint + "/" + record.value.uuid,
+        `${endpoint}/${record.value.uuid}`,
         record.value,
         "update",
         true
       );
-
-      if (result?.data.status) {
-        store.setSnackbar(result.data.message, colors.value.SUCCESS);
-        store.setForm({
-          add: false,
-          edit: false,
-        });
+      if (result?.data?.status) {
+        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setForm({ add: false, edit: false });
         store.changeRecord(result.data.data);
       }
     };
 
-    /**
-     * Confirmation Delete Process
-     * @param payload
-     */
-    const postConfirmDelete = (payload) => {
-      store.setRecord({
-        uuid: payload,
-      });
-      store.setForm({
-        add: false,
-        edit: false,
-        delete: true,
-      });
+    const postConfirmDelete = (uuid) => {
+      store.setRecord({ uuid });
+      store.setForm({ add: false, edit: false, delete: true });
     };
 
-    /**
-     * Post Delete Record
-     * @param payload
-     */
     const postDelete = async () => {
       const result = await store.postRecord(
-        endpoint + "/" + record.value.uuid,
+        `${endpoint}/${record.value.uuid}`,
         {},
         "delete",
         true
       );
-
-      if (result?.data.status) {
-        store.setSnackbar(result.data.message);
-        store.setForm({
-          add: false,
-          edit: false,
-          delete: false,
-        });
-        store.removeRecord(result.data.data.uuid);
+      if (result?.data?.status) {
+        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setForm({ add: false, edit: false, delete: false });
+        store.removeRecord(result.data.data?.uuid);
         store.setRecord({});
+        fetchRecords({
+          page: table.value.footer?.currentPage,
+          itemsPerPage: table.value.footer?.itemsPerPage,
+          keyWord: keyWord.value,
+        });
       }
     };
 
-    const postConfirmBulkDelete = () => {};
-
-    /**
-     * Prepare QR modal preview
-     * @param payload
-     */
-    const openQrModal = async (payload) => {
+    const openQrModal = async (uuid) => {
       try {
         showQrModal.value = true;
         qrLoading.value = true;
         qrPreview.value = null;
-
-        const topic = records.value.find((item) => item.uuid === payload);
-
+        const topic = records.value.find((r) => r.uuid === uuid);
         if (!topic) {
           qrLoading.value = false;
-          store.setSnackbar(
-            "Data topik tidak ditemukan",
-            colors.value.ERROR,
-            types.value.ERROR
-          );
+          store.setSnackbar("Data topik tidak ditemukan", colors.value.ERROR, types.value.ERROR);
           showQrModal.value = false;
           return;
         }
-
-        console.log(topic.url);
-
-        const surveyUrl = `${window.location.origin}/survey/${payload}`;
-
+        const surveyUrl = `${window.location.origin}/survey/${uuid}`;
         qrMeta.value = {
-          uuid: payload,
+          uuid,
           name: topic.name,
           description: topic.description,
           url: surveyUrl,
         };
-
-        const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
-          surveyUrl
-        )}`;
-
+        const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(surveyUrl)}`;
         const response = await fetch(qrEndpoint);
-
-        if (!response.ok) {
-          throw new Error("QR request failed");
-        }
-
+        if (!response.ok) throw new Error("QR request failed");
         const blob = await response.blob();
-        const qrWithText = await composeQrImage(
-          blob,
-          topic.name,
-          topic.description
-        );
+        const qrWithText = await composeQrImage(blob, topic.name, topic.description);
         qrPreview.value = qrWithText;
-
-        store.setSnackbar(
-          "QR Code siap diunduh",
-          colors.value.SUCCESS,
-          types.value.SUCCESS
-        );
-      } catch (error) {
-        console.error("openQrModal error:", error);
+        store.setSnackbar("QR Code siap diunduh", colors.value.SUCCESS, types.value.SUCCESS);
+      } catch (err) {
+        console.error("openQrModal error:", err);
         showQrModal.value = false;
-        store.setSnackbar(
-          "Gagal menyiapkan QR Code",
-          colors.value.ERROR,
-          types.value.ERROR
-        );
+        store.setSnackbar("Gagal menyiapkan QR Code", colors.value.ERROR, types.value.ERROR);
       } finally {
         qrLoading.value = false;
       }
     };
 
-    /**
-     * Download QR from modal preview
-     */
     const downloadQr = () => {
-      if (!qrPreview.value || !qrMeta.value.uuid) {
-        return;
-      }
-
+      if (!qrPreview.value || !qrMeta.value.uuid) return;
       const link = document.createElement("a");
       const safeName = (qrMeta.value.name || "qr-code")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-
       link.href = qrPreview.value;
       link.download = `${safeName}-${qrMeta.value.uuid}.png`;
       document.body.appendChild(link);
       link.click();
       link.remove();
-
-      store.setSnackbar(
-        "QR Code berhasil diunduh",
-        colors.value.SUCCESS,
-        types.value.SUCCESS
-      );
+      store.setSnackbar("QR Code berhasil diunduh", colors.value.SUCCESS, types.value.SUCCESS);
     };
 
-    /**
-     * Open survey link in new tab
-     */
     const openLink = () => {
-      if (!qrMeta.value.url) {
-        return;
-      }
-      window.open(qrMeta.value.url, "_blank");
+      if (qrMeta.value.url) window.open(qrMeta.value.url, "_blank");
     };
 
     const closeQrModal = () => {
       showQrModal.value = false;
       qrPreview.value = null;
-      qrMeta.value = {
-        uuid: null,
-        name: "",
-        description: "",
-        url: "",
-      };
+      qrMeta.value = { uuid: null, name: "", description: "", url: "" };
     };
 
-    /**
-     * Compose QR with title & description text
-     * @param blob
-     * @param title
-     * @param description
-     * @returns {Promise<string>}
-     */
     const composeQrImage = (blob, title, description) => {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -632,70 +465,33 @@ export default {
           const canvas = document.createElement("canvas");
           canvas.width = img.width + padding * 2;
           canvas.height = img.height + infoHeight + padding * 2;
-
           const ctx = canvas.getContext("2d");
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-
           ctx.fillStyle = "#1f2937";
           ctx.textAlign = "center";
-
           const centerX = canvas.width / 2;
           ctx.font = "bold 24px Arial";
-          wrapAndDrawText(
-            ctx,
-            title || "Survey Topic",
-            centerX,
-            padding,
-            canvas.width - padding * 2,
-            28
-          );
-
+          wrapAndDrawText(ctx, title || "Survey Topic", centerX, padding, canvas.width - padding * 2, 28);
           ctx.font = "16px Arial";
-          wrapAndDrawText(
-            ctx,
-            description || "Scan QR untuk membuka survei.",
-            centerX,
-            padding + 40,
-            canvas.width - padding * 2,
-            22
-          );
-
+          wrapAndDrawText(ctx, description || "Scan QR untuk membuka survei.", centerX, padding + 40, canvas.width - padding * 2, 22);
           ctx.drawImage(img, padding, infoHeight, img.width, img.height);
-
           resolve(canvas.toDataURL("image/png"));
         };
-
         const objectUrl = URL.createObjectURL(blob);
-
-        img.onerror = (err) => {
+        img.onerror = () => {
           URL.revokeObjectURL(objectUrl);
-          reject(err);
+          reject(new Error("Image load failed"));
         };
-
-        img.onloadend = () => {
-          URL.revokeObjectURL(objectUrl);
-        };
-
+        img.onloadend = () => URL.revokeObjectURL(objectUrl);
         img.src = objectUrl;
       });
     };
 
-    /**
-     * Helper to wrap and draw text centered
-     */
-    const wrapAndDrawText = (
-      ctx,
-      text,
-      centerX,
-      startY,
-      maxWidth,
-      lineHeight
-    ) => {
+    const wrapAndDrawText = (ctx, text, centerX, startY, maxWidth, lineHeight) => {
       const words = text.split(" ");
       let line = "";
       let y = startY;
-
       for (let i = 0; i < words.length; i++) {
         const testLine = line + words[i] + " ";
         const metrics = ctx.measureText(testLine);
@@ -707,98 +503,27 @@ export default {
           line = testLine;
         }
       }
-
       ctx.fillText(line.trim(), centerX, y);
     };
 
-    const openHelper = () => {
-      store.setForm({
-        help: true,
-      });
+    const showTopicQuestionPage = (uuid) => {
+      router.push({ name: "survey-topic-question-management", params: { survey_topic_id: uuid } });
     };
-
-    const load = async ({ done }) => {
-      const params = {
-        page: list.value.page,
-        itemsPerPage: list.value.itemsPerPage,
-      };
-
-      fetchMobileView(params);
-
-      setTimeout(() => {
-        if (list.value.page < list.value.lastPage) {
-          fetchMobileView(params);
-        } else {
-          done("empty");
-        }
-      }, 1000);
-    };
-
-    const fetchMobileView = async function (params) {
-      const endpoint = "api/v1/master-data/districts";
-      const result = await store.fetchRecords(endpoint, params);
-      result.data.data.forEach((element) => {
-        records.value.push(element);
-      });
-
-      store.setList({
-        page: result.data.meta.current_page + 1,
-        lastPage: result.data.meta.last_page,
-      });
-    };
-
-    const toggleDropDown = () => {
-      isOpen.value = !isOpen.value;
-    };
-
-    const selectOption = (option) => {
-      selectedOption.value = option;
-      isOpen.value = false;
-    };
-
-    watch(keyWord, () => {
-      onSearch();
-    });
 
     const onSearch = debounce(() => {
-      table.value.footer.keyWord = keyWord.value;
-    }, 1000);
+      if (table.value.footer) table.value.footer.keyWord = keyWord.value;
+      fetchRecords({ keyWord: keyWord.value, page: 1 });
+    }, 400);
 
-    //custom page function
-    const showDocumentPage = (payload) => {
-      router.push({
-        name: "survey-topic-document-management",
-        params: { survey_topic_id: payload },
-      });
-    };
-
-    const showCategoryPage = (payload) => {
-      router.push({
-        name: "survey-topic-category-management",
-        params: { survey_topic_id: payload },
-      });
-    };
-
-    const showTopicQuestionPage = (payload) => {
-      router.push({
-        name: "survey-topic-question-management",
-        params: { survey_topic_id: payload },
-      });
-    };
+    watch(keyWord, () => onSearch());
 
     onMounted(() => {
       store.setPage({
-        title: "Manjemen Desa | Kelurahan",
-        subtitle: "Berikut Daftar Seluruh Desa | Kelurahan Pada Aplikasi ",
+        title: "Manajemen Topik Survey",
+        subtitle: "Daftar topik survey pada aplikasi",
         breadcrumbs: [
-          {
-            name: "",
-            title: "Survey",
-          },
-          {
-            name: "master-data-village-management",
-            title: "Manajemen Topik",
-          },
+          { name: "dashboard", title: "Dashboard" },
+          { name: "survey-topic-management", title: "Manajemen Topik" },
         ],
         actions: {
           refresh: true,
@@ -810,6 +535,7 @@ export default {
           print: false,
           help: false,
           close: false,
+          search: true,
         },
         showtable: true,
       });
@@ -817,36 +543,20 @@ export default {
     });
 
     return {
-      device,
-      theme,
       page,
       form,
-      rules,
-      colors,
-      headers,
+      table,
       records,
       record,
-      fetchRecords,
-      table,
       keyWord,
-      list,
-      winheight,
+      headers,
       addNew,
+      fetchRecords,
       postRecord,
       postUpdate,
       showRecord,
       postConfirmDelete,
       postDelete,
-      postConfirmBulkDelete,
-      openHelper,
-      load,
-      isChecked,
-      isOpen,
-      selectOption,
-      toggleDropDown,
-      selectedOption,
-      showDocumentPage,
-      showCategoryPage,
       showTopicQuestionPage,
       openQrModal,
       downloadQr,
@@ -860,5 +570,3 @@ export default {
   },
 };
 </script>
-  
-  

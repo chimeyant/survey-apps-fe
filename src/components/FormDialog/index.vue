@@ -1,215 +1,189 @@
 <template>
-  <div
-    id="dialog"
-    :class="{
-      'hidden': !form.add
-    }"
-    :style="{
-      backgroundColor: `rgba(0,0,0,0.5)`,
-      zIndex: 9999
-    }"
-    class="fixed inset-0 flex items-center justify-center animate-fadeIn"
-  >
-    <!-- Dialog Box -->
-    <div
-      ref="dialogBox"
-      class="rounded-sm shadow-lg"
-      :class="`bg-white ${width}`"
-      :style="dialogStyle"
+  <teleport to="body">
+    <transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <!-- Header -->
       <div
-        class="flex justify-between items-center mb-4 h-[48px] px-4 border-b-4 cursor-move"
-        :class="[
-          `bg-${colors.PRIMARY}-700`,
-          `border-b-${colors.PRIMARY}-900`
-        ]"
-        @mousedown="startDrag"
+        v-if="form.add"
+        id="form-dialog-overlay"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="titleId"
+        @keydown.esc="closeDialog"
       >
-        <h3 class="text-sm font-semibold" :class="`text-${themeColors.title}`">{{ title }}</h3>
-        <div class="flex gap-x-2 px-4 bg-white rounded-full">
-          <i
-            class="ri-close-circle-fill text-red-700  hover:cursor-pointer text-xl hover:scale-125 transition "
-            :class="`text-${themeColors.primary}-50 hover:text-${themeColors.primary}-200`"
-            @click="form.add = false"
-          ></i>
+        <div
+          class="absolute inset-0 bg-black/50"
+          aria-hidden="true"
+          @click="closeDialog"
+        />
+        <div
+          ref="dialogBox"
+          :style="dialogStyle"
+          :id="titleId"
+          :class="width"
+          class="relative z-[10000] flex max-h-[90vh] flex-col rounded-xl bg-white shadow-xl"
+          role="document"
+        >
+          <div
+            class="flex shrink-0 items-center justify-between gap-3 border-b border-gray-300 bg-gray-600 px-5 py-3.5 rounded-t-xl cursor-move"
+            @mousedown="startDrag"
+          >
+            <h2 class="text-base font-semibold text-white truncate pr-2">
+              {{ title }}
+            </h2>
+            <button
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900"
+              aria-label="Tutup"
+              @click.stop="closeDialog"
+            >
+              <i class="ri-close-line text-xl"></i>
+            </button>
+          </div>
+          <div class="flex flex-1 flex-col overflow-y-auto min-h-0">
+            <div class="p-5 sm:p-6">
+              <slot name="formdata" />
+            </div>
+            <div class="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4 rounded-b-xl">
+              <UButton
+                label="Batal"
+                variant="secondary"
+                size="sm"
+                @click="closeDialog"
+              />
+              <UButton
+                v-if="!form.edit"
+                label="Simpan"
+                variant="primary"
+                size="sm"
+                iconLeft="ri-save-line"
+                @click="postRecord"
+              />
+              <UButton
+                v-if="form.edit"
+                label="Ubah"
+                variant="primary"
+                size="sm"
+                iconLeft="ri-edit-line"
+                @click="postUpdate"
+              />
+            </div>
+          </div>
         </div>
       </div>
-      <!-- Form -->
-      <div class="p-5 space-x-2">
-        <slot name="formdata" />
-        
-
-          <div class="flex justify-end gap-x-2">
-            <UButton
-              label="Batal"
-              @click="form.add = false"
-              rounded="sm"
-              variant="secondary"
-              size="sm"
-              iconLeft="ri-close-circle-fill"
-            />
-  
-            <UButton
-              v-if="!form.edit"
-              label="Simpan"
-              @click="postRecord"
-              rounded="sm"
-              size="sm"
-              iconLeft="ri-save-line"
-            />
-            
-            <UButton
-              v-if="form.edit"
-              label="Ubah"
-              @click="postUpdate"
-              rounded="sm"
-              size="sm"
-              iconLeft="ri-edit-line"
-            />
-          </div>
-      </div>
-    </div>
-  </div>
+    </transition>
+  </teleport>
 </template>
 
 <script>
 import { useAppStore } from "@/store/app";
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { UButton } from "@/components";
+
 export default {
-  components: {
-    UButton,
-  },
+  name: "UFormDialog",
+  components: { UButton },
   props: {
     title: {
       type: String,
-      default: "Your Title",
+      default: "Form",
     },
     width: {
       type: String,
-      default: "w-[500px]",
+      default: "w-full max-w-lg",
     },
   },
   setup(props, { emit }) {
     const store = useAppStore();
-    const title = ref(props.title);
-    const width = ref(props.width);
     const form = computed(() => store.form);
-    const themeColors  = computed(() =>  store.getThemeColors);
-    const colors = computed(() =>  store.colors);
+    const titleId =
+      "form-dialog-title-" + Math.random().toString(36).slice(2, 9);
 
-    // Draggable functionality
     const dialogBox = ref(null);
     const position = ref({ x: 0, y: 0 });
     const isDragging = ref(false);
     const dragOffset = ref({ x: 0, y: 0 });
 
     const dialogStyle = computed(() => {
-      if (isDragging.value || position.value.x !== 0 || position.value.y !== 0) {
+      if (position.value.x !== 0 || position.value.y !== 0) {
         return {
-          position: 'fixed',
+          position: "fixed",
           left: `${position.value.x}px`,
           top: `${position.value.y}px`,
-          transform: 'none',
-          zIndex: 10000
+          transform: "none",
         };
       }
-      return {
-        zIndex: 10000
-      };
+      return {};
     });
 
     const startDrag = (e) => {
-      // Only start drag if clicking on the header area, not the close button
-      if (e.target.closest('.cursor-move') && !e.target.closest('i')) {
-        isDragging.value = true;
-        
-        // Get initial mouse position and dialog position
-        const rect = dialogBox.value.getBoundingClientRect();
-        dragOffset.value = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-        
-        // Set initial position
-        position.value = {
-          x: rect.left,
-          y: rect.top
-        };
-        
-        document.addEventListener('mousemove', handleDrag);
-        document.addEventListener('mouseup', stopDrag);
-        e.preventDefault();
-      }
+      if (!dialogBox.value || e.target.closest("button")) return;
+      isDragging.value = true;
+      const rect = dialogBox.value.getBoundingClientRect();
+      dragOffset.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      position.value = { x: rect.left, y: rect.top };
+      document.addEventListener("mousemove", handleDrag);
+      document.addEventListener("mouseup", stopDrag);
+      e.preventDefault();
     };
 
     const handleDrag = (e) => {
-      if (isDragging.value) {
-        const newX = e.clientX - dragOffset.value.x;
-        const newY = e.clientY - dragOffset.value.y;
-        
-        // Get viewport dimensions
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        // Get dialog dimensions
-        const dialogWidth = dialogBox.value.offsetWidth;
-        const dialogHeight = dialogBox.value.offsetHeight;
-        
-        // Constrain to viewport bounds
-        position.value = {
-          x: Math.max(0, Math.min(newX, viewportWidth - dialogWidth)),
-          y: Math.max(0, Math.min(newY, viewportHeight - dialogHeight))
-        };
-      }
+      if (!isDragging.value || !dialogBox.value) return;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const w = dialogBox.value.offsetWidth;
+      const h = dialogBox.value.offsetHeight;
+      position.value = {
+        x: Math.max(0, Math.min(e.clientX - dragOffset.value.x, vw - w)),
+        y: Math.max(0, Math.min(e.clientY - dragOffset.value.y, vh - h)),
+      };
     };
 
     const stopDrag = () => {
       isDragging.value = false;
-      document.removeEventListener('mousemove', handleDrag);
-      document.removeEventListener('mouseup', stopDrag);
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", stopDrag);
     };
 
     const resetPosition = () => {
       position.value = { x: 0, y: 0 };
-      isDragging.value = false;
     };
 
-    // Reset position when dialog closes
-    const formWatcher = computed(() => store.form);
-    const unwatchForm = computed(() => {
-      if (!formWatcher.value.add) {
-        resetPosition();
+    const closeDialog = () => {
+      store.setForm({ add: false, edit: false });
+      resetPosition();
+    };
+
+    const postRecord = () => emit("onSave");
+    const postUpdate = () => emit("onUpdate");
+
+    watch(
+      () => form.value.add,
+      (add) => {
+        if (!add) resetPosition();
       }
-      return formWatcher.value;
+    );
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", stopDrag);
     });
-
-    onUnmounted(() => {
-      document.removeEventListener('mousemove', handleDrag);
-      document.removeEventListener('mouseup', stopDrag);
-    });
-
-    const postRecord = () => {
-      emit("onSave");
-    };
-
-    const postUpdate = () => {
-      emit("onUpdate");
-    };
 
     return {
       form,
-      title,
-      width,
-      themeColors,
-      postRecord,
-      postUpdate,
-      colors,
+      titleId,
       dialogBox,
       dialogStyle,
       startDrag,
-      unwatchForm
+      closeDialog,
+      postRecord,
+      postUpdate,
     };
   },
 };
