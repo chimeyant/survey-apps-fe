@@ -48,7 +48,7 @@
               v-for="item in records"
               :key="getQuestionKey(item)"
             >
-              <div :class="item.width || 'col-span-12'">
+              <div :class="getItemWidthClass(item)">
                 <UTextField
                   v-if="item.question_type === 'text'"
                   v-model="questions[getQuestionKey(item)]"
@@ -275,6 +275,13 @@ export default {
 
     /** Kunci pertanyaan (API bisa pakai id atau Id) */
     const getQuestionKey = (item) => item?.id ?? item?.Id;
+
+    /** Di mobile selalu col-span-12; di md+ pakai item.width bila ada */
+    const getItemWidthClass = (item) => {
+      const w = item?.width;
+      if (!w || w === "col-span-12") return "col-span-12";
+      return `col-span-12 md:${w}`;
+    };
 
     // Normalize options untuk ComboBox/Radio (value & title)
     function normalizeOptions(opts) {
@@ -525,6 +532,7 @@ export default {
       onLocationChange,
       normalizeOptions,
       getQuestionKey,
+      getItemWidthClass,
       submitSurvey,
     };
   },
