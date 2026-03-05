@@ -257,12 +257,9 @@ export default {
     const surveySessionId = ref("");
 
     function generateSurveySessionId() {
-      if (typeof crypto !== "undefined" && crypto.randomUUID) {
-        return crypto.randomUUID();
-      }
-      const t = Date.now().toString(36);
-      const r = Math.random().toString(36).slice(2, 10);
-      return `${t}-${r}`;
+      const timestamp = Date.now().toString(36);
+      const random = Math.random().toString(36).substr(2, 5);
+      return `SRV-${timestamp.toUpperCase()}-${random.toUpperCase()}`;
     }
 
     function copySurveyId() {
