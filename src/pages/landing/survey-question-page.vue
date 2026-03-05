@@ -27,6 +27,22 @@
           @submit.prevent="submitSurvey"
           class="space-y-6"
         >
+          <!-- Survey Session ID (di dalam card) -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-200">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200">
+              <span class="text-gray-600 text-sm font-medium">ID Survei:</span>
+              <span class="text-gray-900 font-mono font-semibold tracking-wide">{{ surveySessionId }}</span>
+              <button
+                type="button"
+                @click="copySurveyId"
+                class="p-1 rounded-lg text-gray-500 hover:text-cyan-600 hover:bg-gray-200 transition-colors"
+                title="Salin ID"
+              >
+                <i class="ri-file-copy-line text-lg"></i>
+              </button>
+            </div>
+          </div>
+
           <div class="grid grid-cols-12 md:grid-cols-12 gap-4">
             <template
               v-for="item in records"
@@ -236,6 +252,29 @@ export default {
     });
 
     const surveyTopicId = route.params.survey_topic_id;
+
+    /** ID unik sesi survei (berbeda tiap reload) */
+    const surveySessionId = ref("");
+
+    function generateSurveySessionId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      const t = Date.now().toString(36);
+      const r = Math.random().toString(36).slice(2, 10);
+      return `${t}-${r}`;
+    }
+
+    function copySurveyId() {
+      if (!surveySessionId.value) return;
+      navigator.clipboard.writeText(surveySessionId.value).then(() => {
+        store.setSnackbar?.(
+          "ID survei disalin",
+          store.colors?.SUCCESS ?? "success",
+          store.types?.SUCCESS ?? "success"
+        );
+      });
+    }
 
     /** Kunci pertanyaan (API bisa pakai id atau Id) */
     const getQuestionKey = (item) => item?.id ?? item?.Id;
@@ -463,6 +502,7 @@ export default {
     };
 
     onMounted(() => {
+      surveySessionId.value = generateSurveySessionId();
       fetchSurveyTopic();
       fetchQuestions();
       if (navigator.geolocation) {
@@ -481,6 +521,8 @@ export default {
       records,
       questions,
       isSubmitting,
+      surveySessionId,
+      copySurveyId,
       coordinates,
       initialLocation,
       onLocationChange,
