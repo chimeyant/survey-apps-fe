@@ -535,6 +535,7 @@ export default {
       getQuestionKey,
       getItemWidthClass,
       submitSurvey,
+      isMobile,
     };
   },
 };
