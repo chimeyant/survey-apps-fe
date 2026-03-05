@@ -243,6 +243,15 @@
               </button>
               <button
                 type="button"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-1"
+                :disabled="qrLoading || !qrMeta.url"
+                @click="copyLink"
+              >
+                <i class="ri-file-copy-line mr-1.5 align-middle"></i>
+                Copy Link
+              </button>
+              <button
+                type="button"
                 class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
                 :disabled="qrLoading || !qrPreview"
                 @click="downloadQr"
@@ -450,6 +459,16 @@ export default {
       if (qrMeta.value.url) window.open(qrMeta.value.url, "_blank");
     };
 
+    const copyLink = async () => {
+      if (!qrMeta.value?.url) return;
+      try {
+        await navigator.clipboard.writeText(qrMeta.value.url);
+        store.setSnackbar("Link disalin ke clipboard", colors.value.SUCCESS, types.value.SUCCESS);
+      } catch (e) {
+        store.setSnackbar("Gagal menyalin link", colors.value.ERROR, types.value.ERROR);
+      }
+    };
+
     const closeQrModal = () => {
       showQrModal.value = false;
       qrPreview.value = null;
@@ -561,6 +580,7 @@ export default {
       openQrModal,
       downloadQr,
       openLink,
+      copyLink,
       closeQrModal,
       showQrModal,
       qrPreview,
