@@ -276,10 +276,11 @@ export default {
     /** Kunci pertanyaan (API bisa pakai id atau Id) */
     const getQuestionKey = (item) => item?.id ?? item?.Id;
 
-    /** Di mobile selalu col-span-12; di md+ pakai item.width bila ada */
+    /** Mobile: selalu col-span-12. Non-mobile (md+): hanya mengikuti item.width (mis. col-span-6). */
     const getItemWidthClass = (item) => {
       const w = item?.width;
       if (!w || w === "col-span-12") return "col-span-12";
+      // Mobile: full width. Desktop (md+): hanya item.width (md:col-span-X).
       return `col-span-12 md:${w}`;
     };
 
