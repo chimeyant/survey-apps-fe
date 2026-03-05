@@ -218,6 +218,7 @@ import {
   UCheckbox,
 } from "@/components";
 import ULokasi from "@/components/Lokasi/index.vue";
+import { useMobile } from "@/composables/useMobile";
 
 export default {
   name: "SurveyQuestionPage",
@@ -236,6 +237,7 @@ export default {
     const store = useAppStore();
     const route = useRoute();
     const router = useRouter();
+    const { isMobile } = useMobile();
 
     const surveyInfo = ref({ name: "", description: "" });
     const records = ref([]);
