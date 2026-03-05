@@ -48,7 +48,7 @@
               v-for="item in records"
               :key="getQuestionKey(item)"
             >
-              <div :class="getItemWidthClass(item)">
+              <div :class="item.width || 'col-span-12'">
                 <UTextField
                   v-if="item.question_type === 'text'"
                   v-model="questions[getQuestionKey(item)]"
