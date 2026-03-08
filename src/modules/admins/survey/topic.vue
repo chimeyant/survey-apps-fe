@@ -54,6 +54,9 @@
                   {{ item.status ? 'Aktif' : 'Nonaktif' }}
                 </span>
               </td>
+              <td class="px-4 py-3 text-center text-sm text-gray-600">
+                {{ item.respondent_count ?? 0 }}
+              </td>
               <td class="px-4 py-3 text-right">
                 <UDropdownOpsi>
                   <template #menu>
@@ -347,6 +350,7 @@ export default {
       { title: "Token", key: "token", align: "center", width: "120px" },
       { title: "QR", key: "qr", align: "center", width: "100px" },
       { title: "Status", key: "status", align: "center", width: "90px" },
+      { title: "Jml Responden", key: "respondent_count", align: "center", width: "100px" },
       {
         title: "Aksi",
         key: "id",
