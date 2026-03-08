@@ -11,6 +11,7 @@
       <template #data-table>
         <UDataTable
           :headers="tableHeaders"
+          v-model:column-widths="columnWidths"
           @update:options="fetchRecords"
         >
           <template #body>
@@ -19,16 +20,23 @@
               :key="item.uuid || item.id || index"
               class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              <td class="px-4 py-3 text-center text-sm text-gray-500 w-14">
+              <td
+                class="px-4 py-3 text-center text-sm text-gray-500"
+                :style="getColumnStyle(tableHeaders[0]?.key)"
+              >
                 {{ table.footer?.itemsPerPage * (table.footer?.currentPage - 1) + index + 1 }}
               </td>
-              <td class="px-4 py-3 text-sm text-gray-900 max-w-[200px]">
+              <td
+                class="px-4 py-3 text-sm text-gray-900"
+                :style="getColumnStyle(tableHeaders[1]?.key)"
+              >
                 <span class="font-medium line-clamp-2">{{ item.respondent_id || '—' }}</span>
               </td>
               <td
-                v-for="q in questionColumns"
+                v-for="(q, qIdx) in questionColumns"
                 :key="q.survey_topic_question_id"
-                class="px-4 py-3 text-sm text-gray-700 max-w-[180px]"
+                class="px-4 py-3 text-sm text-gray-700"
+                :style="getColumnStyle(tableHeaders[2 + qIdx]?.key)"
               >
                 <span
                   v-if="isCheckboxChecked(getAnswerRow(item, q.survey_topic_question_id))"
@@ -78,7 +86,10 @@
                 >{{ getAnswerForQuestion(item, q.survey_topic_question_id) }}</span>
               </td>
 
-              <td class="px-4 py-3 text-right">
+              <td
+                class="px-4 py-3 text-right"
+                :style="getColumnStyle(tableHeaders[tableHeaders.length - 1]?.key)"
+              >
                 <UDropdownOpsi>
                   <template #menu>
 
@@ -798,31 +809,39 @@ export default {
 
     const tableHeaders = computed(() => {
       const base = [
-        { title: "#", key: "ids", align: "center", width: "50px" },
+        { title: "#", key: "ids", align: "center", width: "auto" },
         {
           title: "Responden Id",
           key: "respondent_id",
           align: "start",
-          width: "200px",
+          width: "auto",
         },
       ];
       const questionHeaders = questionColumns.value.map((q) => ({
         title: q.question_text,
         key: `q_${q.survey_topic_question_id}`,
         align: "start",
-        width: "180px",
+        width: "auto",
       }));
       const end = [
         {
           title: "Aksi",
           key: "id",
           align: "end",
-          width: "80px",
+          width: "auto",
           sortable: false,
         },
       ];
       return [...base, ...questionHeaders, ...end];
     });
+
+    const columnWidths = ref({});
+
+    const getColumnStyle = (key) => {
+      if (!key || columnWidths.value[key] == null) return {};
+      const w = columnWidths.value[key];
+      return { width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px` };
+    };
 
     const getAnswerForQuestion = (respondent, questionId) => {
       const answers = respondent.survey_topic_question_answers || [];
@@ -1183,6 +1202,8 @@ export default {
       record,
       keyWord,
       tableHeaders,
+      columnWidths,
+      getColumnStyle,
       questionColumns,
       getAnswerForQuestion,
       getAnswerRow,
