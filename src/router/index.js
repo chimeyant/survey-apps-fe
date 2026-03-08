@@ -22,16 +22,16 @@ import surveyTopicDocument from "@/pages/admin/survey/topic-document-page.vue"
 import surveyTopicCategory from "@/pages/admin/survey/topic-category-page.vue"
 import surveyData from "@/pages/admin/survey/data-pages.vue"
 import surveyTopicQuestion from "@/pages/admin/survey/topic-question-page.vue"
+import surveyTopicRespondent from "@/pages/admin/survey/topic-respondent-page.vue"
 
+//landing page
 import homePage from "@/pages/landing/home-page.vue"
 import survey from "@/pages/landing/survey-page.vue"
 import surveyQuestionPage from "@/pages/landing/survey-question-page.vue"
 import sendingSuccess from "@/pages/landing/sending-success.vue"
 
 
-// Import Theme Demo
-// import themeDemo from "@/components/ThemeDemo/index.vue"
-// import themeTest from "@/components/ThemeTest/index.vue"
+
 
 const routes = [
     {
@@ -138,6 +138,11 @@ const routes = [
                 path: "/auth/logged/survey/data-management",
                 name: "survey-data-management",
                 component: surveyData,
+            },
+            {
+                path: "/auth/logged/survey/topic-respondent-management/:survey_topic_id",
+                name: "survey-topic-respondent-management",
+                component: surveyTopicRespondent,
             }
 
         ]

@@ -1,14 +1,15 @@
 <template>
   <div class="flex flex-col w-full min-h-full">
     <UFormDataTable
-      title="Daftar Topik Survey"
+      :title="page.title"
+      :subtitle="page.subtitle"
       @onRefresh="fetchRecords({})"
       @onAdd="addNew"
       v-model:keyWord="keyWord"
     >
       <template #data-table>
         <UDataTable
-          :headers="headers"
+          :headers="tableHeaders"
           @update:options="fetchRecords"
         >
           <template #body>
@@ -21,39 +22,16 @@
                 {{ table.footer?.itemsPerPage * (table.footer?.currentPage - 1) + index + 1 }}
               </td>
               <td class="px-4 py-3 text-sm text-gray-900 max-w-[200px]">
-                <span class="font-medium line-clamp-2">{{ item.name }}</span>
+                <span class="font-medium line-clamp-2">{{ item.respondent_id || '—' }}</span>
               </td>
-              <td class="px-4 py-3 text-center text-sm text-gray-600 whitespace-nowrap">
-                {{ item.start_date }} – {{ item.end_date }}
+              <td
+                v-for="q in questionColumnsFirstThree"
+                :key="q.survey_topic_question_id"
+                class="px-4 py-3 text-sm text-gray-700 max-w-[180px]"
+              >
+                <span class="line-clamp-2">{{ getAnswerForQuestion(item, q.survey_topic_question_id) }}</span>
               </td>
-              <td class="px-4 py-3 text-center">
-                <span
-                  v-if="item.is_token"
-                  class="font-mono text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded"
-                >{{ item.token || '—' }}</span>
-                <span
-                  v-else
-                  class="text-xs text-gray-500"
-                >Tidak aktif</span>
-              </td>
-              <td class="px-4 py-3 text-center">
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                  @click="openQrModal(item.uuid)"
-                >
-                  <i class="ri-qr-code-line text-base"></i>
-                  QR Code
-                </button>
-              </td>
-              <td class="px-4 py-3 text-center">
-                <span
-                  :class="item.status ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'"
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                >
-                  {{ item.status ? 'Aktif' : 'Nonaktif' }}
-                </span>
-              </td>
+
               <td class="px-4 py-3 text-right">
                 <UDropdownOpsi>
                   <template #menu>
@@ -69,7 +47,7 @@
                     <button
                       type="button"
                       class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                      @click="showTopicRespondentPage(item.uuid)"
+                      @click="openDetailJawaban(item)"
                     >
                       <i class="ri-group-line text-lg text-indigo-600"></i>
                       <span>Data Responden</span>
@@ -285,12 +263,112 @@
         </div>
       </transition>
     </teleport>
+
+    <!-- Modal Detail Jawaban (dynamic table dari survey_topic_question_answers) -->
+    <teleport to="body">
+      <transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showDetailJawaban"
+          class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="detail-jawaban-title"
+        >
+          <div
+            class="absolute inset-0 bg-black/50"
+            aria-hidden="true"
+            @click="closeDetailJawaban"
+          />
+          <div
+            class="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-xl bg-white shadow-xl overflow-hidden"
+            role="document"
+          >
+            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 bg-gray-50 shrink-0">
+              <h2
+                id="detail-jawaban-title"
+                class="text-lg font-semibold text-gray-900"
+              >
+                Data Responden — {{ detailRespondent?.respondent_id || '—' }}
+              </h2>
+              <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Tutup"
+                @click="closeDetailJawaban"
+              >
+                <i class="ri-close-line text-xl"></i>
+              </button>
+            </div>
+            <div class="flex-1 overflow-auto p-5">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-50">
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700 w-12">#</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Pertanyaan</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700 w-28">Tipe</th>
+                    <th class="px-4 py-3 text-center font-semibold text-gray-700 w-20">Wajib</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700 min-w-[120px]">Jawaban 1</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700 min-w-[120px]">Jawaban 2</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-700 min-w-[120px]">Jawaban 3</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, idx) in detailAnswerRows"
+                    :key="row.key"
+                    class="border-b border-gray-100 hover:bg-gray-50"
+                  >
+                    <td class="px-4 py-3 text-gray-500">{{ idx + 1 }}</td>
+                    <td class="px-4 py-3 text-gray-900">{{ row.question_text || '—' }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ row.question_type || '—' }}</td>
+                    <td class="px-4 py-3 text-center">
+                      <span
+                        :class="row.question_required ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'"
+                        class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                      >
+                        {{ row.question_required ? 'Ya' : 'Tidak' }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">{{ row.jawaban1 || '—' }}</td>
+                    <td class="px-4 py-3 text-gray-700">{{ row.jawaban2 || '—' }}</td>
+                    <td class="px-4 py-3 text-gray-700">{{ row.jawaban3 || '—' }}</td>
+                  </tr>
+                  <tr v-if="!detailAnswerRows.length">
+                    <td
+                      colspan="7"
+                      class="px-4 py-8 text-center text-gray-500"
+                    >Tidak ada jawaban.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4 shrink-0">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                @click="closeDetailJawaban"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
   </div>
 </template>
-
-<script>
+  
+  <script>
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { computed, onMounted, ref, watch } from "vue";
 import {
   UDataTable,
@@ -319,6 +397,7 @@ export default {
   setup() {
     const store = useAppStore();
     const router = useRouter();
+    const route = useRoute();
     const page = computed(() => store.page);
     const form = computed(() => store.form);
     const colors = computed(() => store.colors);
@@ -327,7 +406,8 @@ export default {
     const record = computed(() => store.record);
     const records = computed(() => store.records);
 
-    const endpoint = "api/v1/survey/survey-topics";
+    const endpoint =
+      "api/v1/survey/survey-topic-respondents/" + route.params.survey_topic_id;
     const keyWord = ref("");
 
     const showQrModal = ref(false);
@@ -340,21 +420,128 @@ export default {
       url: "",
     });
 
-    const headers = [
-      { title: "#", key: "ids", align: "center", width: "50px" },
-      { title: "Topik", key: "name", align: "start", width: "200px" },
-      { title: "Periode", key: "date", align: "center", width: "140px" },
-      { title: "Token", key: "token", align: "center", width: "120px" },
-      { title: "QR", key: "qr", align: "center", width: "100px" },
-      { title: "Status", key: "status", align: "center", width: "90px" },
-      {
-        title: "Aksi",
-        key: "id",
-        align: "end",
-        width: "80px",
-        sortable: false,
-      },
-    ];
+    const showDetailJawaban = ref(false);
+    const detailRespondent = ref(null);
+
+    const openDetailJawaban = (item) => {
+      detailRespondent.value = item;
+      showDetailJawaban.value = true;
+    };
+
+    const closeDetailJawaban = () => {
+      showDetailJawaban.value = false;
+      detailRespondent.value = null;
+    };
+
+    const formatAnswer = (row) => {
+      if (row.answer_text) return row.answer_text;
+      if (row.answer_json != null && row.answer_json !== "") {
+        try {
+          const parsed =
+            typeof row.answer_json === "string"
+              ? JSON.parse(row.answer_json)
+              : row.answer_json;
+          return typeof parsed === "object"
+            ? JSON.stringify(parsed)
+            : String(parsed);
+        } catch {
+          return String(row.answer_json);
+        }
+      }
+      return "—";
+    };
+
+    /** Baris untuk modal detail: dikelompokkan per pertanyaan, maksimal 3 jawaban pertama per kolom */
+    const detailAnswerRows = computed(() => {
+      const answers =
+        detailRespondent.value?.survey_topic_question_answers || [];
+      if (!answers.length) return [];
+      const byQuestion = {};
+      for (const a of answers) {
+        const key = a.survey_topic_question_id ?? a.question_text ?? a.id;
+        if (!byQuestion[key]) {
+          byQuestion[key] = {
+            key: String(key),
+            question_text: a.question_text,
+            question_type: a.question_type,
+            question_required: a.question_required,
+            items: [],
+          };
+        }
+        byQuestion[key].items.push(a);
+      }
+      return Object.values(byQuestion).map((g) => {
+        const firstThree = g.items.slice(0, 3);
+        return {
+          key: g.key,
+          question_text: g.question_text,
+          question_type: g.question_type,
+          question_required: g.question_required,
+          jawaban1: firstThree[0] ? formatAnswer(firstThree[0]) : "—",
+          jawaban2: firstThree[1] ? formatAnswer(firstThree[1]) : "—",
+          jawaban3: firstThree[2] ? formatAnswer(firstThree[2]) : "—",
+        };
+      });
+    });
+
+    /** Kolom pertanyaan dinamis: gabungan unique question dari semua responden (urutan pertama muncul) */
+    const questionColumns = computed(() => {
+      const seen = new Map();
+      for (const r of records.value) {
+        const list = r.survey_topic_question_answers || [];
+        for (const a of list) {
+          const id = a.survey_topic_question_id;
+          if (id != null && !seen.has(id)) {
+            seen.set(id, {
+              survey_topic_question_id: id,
+              question_text: a.question_text || `Pertanyaan ${id}`,
+            });
+          }
+        }
+      }
+      return Array.from(seen.values());
+    });
+
+    /** Tiga pertanyaan pertama saja untuk kolom tabel */
+    const questionColumnsFirstThree = computed(() =>
+      questionColumns.value.slice(0, 3)
+    );
+
+    const tableHeaders = computed(() => {
+      const base = [
+        { title: "#", key: "ids", align: "center", width: "50px" },
+        {
+          title: "Responden Id",
+          key: "respondent_id",
+          align: "start",
+          width: "200px",
+        },
+      ];
+      const questionHeaders = questionColumnsFirstThree.value.map((q) => ({
+        title: q.question_text,
+        key: `q_${q.survey_topic_question_id}`,
+        align: "start",
+        width: "180px",
+      }));
+      const end = [
+        {
+          title: "Aksi",
+          key: "id",
+          align: "end",
+          width: "80px",
+          sortable: false,
+        },
+      ];
+      return [...base, ...questionHeaders, ...end];
+    });
+
+    const getAnswerForQuestion = (respondent, questionId) => {
+      const answers = respondent.survey_topic_question_answers || [];
+      const found = answers.find(
+        (a) => a.survey_topic_question_id === questionId
+      );
+      return found ? formatAnswer(found) : "—";
+    };
 
     const addNew = () => {
       store.setRecord({});
@@ -367,6 +554,7 @@ export default {
         itemsPerPage:
           payload.itemsPerPage ?? table.value.footer?.itemsPerPage ?? 10,
         keyWord: payload.keyWord ?? payload.keyword ?? keyWord.value ?? null,
+        surveyTopicId: route.params.survey_topic_id || undefined,
       };
       const result = await store.fetchRecords(endpoint, params, true);
       store.setRecords(result?.data?.data ?? []);
@@ -628,13 +816,6 @@ export default {
       });
     };
 
-    const showTopicRespondentPage = (uuid) => {
-      router.push({
-        name: "survey-topic-respondent-management",
-        params: { survey_topic_id: uuid },
-      });
-    };
-
     const onSearch = debounce(() => {
       if (table.value.footer) table.value.footer.keyWord = keyWord.value;
       fetchRecords({ keyWord: keyWord.value, page: 1 });
@@ -644,15 +825,19 @@ export default {
 
     onMounted(() => {
       store.setPage({
-        title: "Manajemen Topik Survey",
-        subtitle: "Daftar topik survey pada aplikasi",
+        title: "Daftar Data Responden",
+        subtitle: "Berikut Daftar Seluruh Data Responden Pada Aplikasi",
         breadcrumbs: [
           { name: "dashboard", title: "Dashboard" },
-          { name: "survey-topic-management", title: "Manajemen Topik" },
+          { name: "survey-topic-management", title: "Topik" },
+          {
+            name: "survey-topic-respondent-management",
+            title: "Data Responden",
+          },
         ],
         actions: {
           refresh: true,
-          add: true,
+          add: false,
           edit: true,
           delete: true,
           bulkdelete: false,
@@ -674,7 +859,10 @@ export default {
       records,
       record,
       keyWord,
-      headers,
+      tableHeaders,
+      questionColumns,
+      questionColumnsFirstThree,
+      getAnswerForQuestion,
       addNew,
       fetchRecords,
       postRecord,
@@ -692,8 +880,14 @@ export default {
       qrPreview,
       qrLoading,
       qrMeta,
-      showTopicRespondentPage,
+      showDetailJawaban,
+      detailRespondent,
+      openDetailJawaban,
+      closeDetailJawaban,
+      formatAnswer,
+      detailAnswerRows,
     };
   },
 };
 </script>
+  

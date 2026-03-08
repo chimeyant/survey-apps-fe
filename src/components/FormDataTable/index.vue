@@ -162,11 +162,15 @@ export default {
 
     watch(
       () => props.title,
-      (v) => { title.value = v; }
+      (v) => {
+        title.value = v;
+      }
     );
     watch(
       () => props.show,
-      (v) => { show.value = v; }
+      (v) => {
+        show.value = v;
+      }
     );
     watch(
       () => page.value?.actions?.search,
