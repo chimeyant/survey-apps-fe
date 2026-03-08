@@ -13,11 +13,26 @@
       <div class="bg-white rounded-lg shadow-xl p-8 min-h-[70vh]">
         <div class="grid grid-cols-12 md:grid-cols-12 gap-4">
           <template
-            v-for="item in records"
+            v-for="(item, index) in records"
             :key="item.id"
           >
-
-            <div :class="item.width || 'col-span-12'">
+            <div
+              :class="[item.width || 'col-span-12', draggedIndex === index && 'opacity-60']"
+              class="relative group"
+              draggable="true"
+              @dragstart="onDragStart($event, index)"
+              @dragover.prevent="onDragOver($event, index)"
+              @drop.prevent="onDrop($event, index)"
+            >
+              <!-- Drag handle -->
+              <div
+                class="absolute left-0 top-2 w-6 h-8 flex items-center justify-center rounded cursor-grab active:cursor-grabbing text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 z-10"
+                title="Drag untuk mengubah urutan"
+                @mousedown.stop
+              >
+                <i class="ri-draggable text-lg"></i>
+              </div>
+              <div :class="[item.width || 'col-span-12', 'pl-8']">
               <UTextField
                 v-if="item.question_type === 'text'"
                 v-model="questions[item.id]"
@@ -140,7 +155,7 @@
                 </button>
               </div>
             </div>
-
+            </div>
           </template>
           <div class="col-span-12">
             <UButton
@@ -286,6 +301,7 @@
 
 <script>
 import { useAppStore } from "@/store/app";
+import authProvider from "@/provider/authProviders";
 import {
   computed,
   onBeforeUnmount,
@@ -344,6 +360,56 @@ export default {
     const question = ref({});
     const questions = ref({});
     const survey_info = ref({});
+    const draggedIndex = ref(null);
+
+    const onDragStart = (e, index) => {
+      draggedIndex.value = index;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(index));
+    };
+
+    const onDragOver = (e) => {
+      e.dataTransfer.dropEffect = "move";
+    };
+
+    const onDrop = async (e, toIndex) => {
+      e.preventDefault();
+      const fromIndex = draggedIndex.value;
+      if (fromIndex == null || fromIndex === toIndex) {
+        draggedIndex.value = null;
+        return;
+      }
+      const list = [...store.records];
+      const [item] = list.splice(fromIndex, 1);
+      list.splice(toIndex, 0, item);
+      store.setRecords(list);
+      draggedIndex.value = null;
+
+      const reorderUrl =
+        "api/v1/survey/survey-topic-questions/" +
+        route.params.survey_topic_id +
+        "/reorder";
+      try {
+        const auth = new authProvider();
+        const encryptdata = auth.encryptRequest({
+          order: list.map((r) => r.uuid),
+        });
+        const result = await store.http.post(reorderUrl, encryptdata);
+        if (result?.data?.status) {
+          store.setSnackbar(
+            result.data.message || "Urutan berhasil diperbarui",
+            colors.value.SUCCESS,
+            types.value.SUCCESS
+          );
+        }
+      } catch (err) {
+        store.setSnackbar(
+          err?.response?.data?.message || "Gagal memperbarui urutan",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
+      }
+    };
 
     // Inisialisasi nilai lokasi (Kecamatan & Desa) saat records dimuat
     watch(
@@ -750,6 +816,10 @@ export default {
       form,
       records,
       record,
+      draggedIndex,
+      onDragStart,
+      onDragOver,
+      onDrop,
       addNew,
       closeForm,
       question_types,
