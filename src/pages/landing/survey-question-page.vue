@@ -54,12 +54,14 @@
                   v-model="questions[getQuestionKey(item)]"
                   :label="item.question_text"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UTextArea
                   v-else-if="item.question_type === 'textarea'"
                   v-model="questions[getQuestionKey(item)]"
                   :label="item.question_text"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UComboBox
                   v-else-if="item.question_type === 'select'"
@@ -70,6 +72,7 @@
                   label-key="title"
                   placeholder="Pilih Opsi"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UComboBox
                   v-else-if="item.question_type === 'radio'"
@@ -80,6 +83,7 @@
                   label-key="title"
                   placeholder="Pilih salah satu"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UCheckbox
                   v-else-if="item.question_type === 'checkbox'"
@@ -93,6 +97,7 @@
                   :label="item.question_text"
                   type="number"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UTextField
                   v-else-if="item.question_type === 'date'"
@@ -100,6 +105,7 @@
                   :label="item.question_text"
                   type="date"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UTextField
                   v-else-if="item.question_type === 'time'"
@@ -107,6 +113,7 @@
                   :label="item.question_text"
                   type="time"
                   :required="item.required"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <UFileUpload
                   v-else-if="item.question_type === 'file'"
@@ -114,6 +121,7 @@
                   :label="item.question_text"
                   :required="item.required"
                   folder="documents"
+                  :error="validationErrors[getQuestionKey(item)]"
                 />
                 <USwitch
                   v-else-if="item.question_type === 'switch'"
@@ -129,14 +137,28 @@
                       class="text-red-500"
                     >*</span>
                   </label>
-                  <div class="border border-gray-300 rounded-xl p-4 bg-gray-50">
+                  <div :class="[
+                      'rounded-xl p-4 border-2 transition-colors',
+                      validationErrors[getQuestionKey(item)]
+                        ? 'border-red-500 bg-red-50/50'
+                        : 'border-gray-300 bg-gray-50'
+                    ]">
                     <UMapCoordinatePicker
                       v-model="coordinates"
                       @update:modelValue="onLocationChange"
                       :initial-location="initialLocation"
                     />
                   </div>
-                  <p class="text-sm text-gray-600 mt-2">
+                  <p
+                    v-if="validationErrors[getQuestionKey(item)]"
+                    class="text-sm text-red-600 mt-2"
+                  >
+                    {{ validationErrors[getQuestionKey(item)] }}
+                  </p>
+                  <p
+                    v-else
+                    class="text-sm text-gray-600 mt-2"
+                  >
                     💡 Klik di peta atau gunakan tombol "Lokasi Saat Ini" untuk mendapatkan koordinat GPS
                   </p>
                 </div>
@@ -145,6 +167,10 @@
                     v-model="questions[getQuestionKey(item)]"
                     :label-kecamatan="item.question_text"
                     :required="item.required"
+                    :errors="{
+                      district_code: validationErrors[getQuestionKey(item)] || '',
+                      village_code: validationErrors[getQuestionKey(item)] || ''
+                    }"
                   />
                 </div>
                 <div
@@ -243,6 +269,7 @@ export default {
     const records = ref([]);
     const questions = ref({});
     const isSubmitting = ref(false);
+    const validationErrors = ref({});
 
     const coordinates = ref({
       latitude: null,
@@ -299,6 +326,17 @@ export default {
       if (location) {
         coordinates.value.latitude = location.latitude;
         coordinates.value.longitude = location.longitude;
+        // Sinkronkan ke questions agar jawaban tipe location terisi
+        const locationQuestion = records.value.find(
+          (r) => r.question_type === "location"
+        );
+        if (locationQuestion) {
+          const key = getQuestionKey(locationQuestion);
+          questions.value[key] = {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          };
+        }
       }
     };
 
@@ -316,6 +354,17 @@ export default {
               typeof questions.value[key] !== "object")
           ) {
             questions.value[key] = { district_code: "", village_code: "" };
+          }
+          // Inisialisasi pertanyaan tipe location (GPS) ke questions
+          if (
+            r.question_type === "location" &&
+            (questions.value[key] === undefined ||
+              typeof questions.value[key] !== "object")
+          ) {
+            questions.value[key] = {
+              latitude: coordinates.value.latitude ?? null,
+              longitude: coordinates.value.longitude ?? null,
+            };
           }
         });
       },
@@ -395,6 +444,10 @@ export default {
         const answerJson = isObject ? val : null;
         out.push({
           survey_topic_question_id: questionId,
+          question_type: item.question_type,
+          question_text: item.question_text ?? "",
+          question_required: !!item.required,
+          question_options: item.options ?? [],
           answer_text: answerText,
           answer_json: answerJson,
         });
@@ -415,9 +468,17 @@ export default {
         if (existing) {
           existing.answer_text = "";
           existing.answer_json = locPayload;
+          existing.question_type = locationQuestion.question_type;
+          existing.question_text = locationQuestion.question_text ?? "";
+          existing.question_required = !!locationQuestion.required;
+          existing.question_options = locationQuestion.options ?? [];
         } else {
           out.push({
             survey_topic_question_id: locId,
+            question_type: locationQuestion.question_type,
+            question_text: locationQuestion.question_text ?? "",
+            question_required: !!locationQuestion.required,
+            question_options: locationQuestion.options ?? [],
             answer_text: "",
             answer_json: locPayload,
           });
@@ -427,7 +488,12 @@ export default {
     };
 
     const submitSurvey = async () => {
-      if (!records.value || records.value.length === 0) {
+      console.log("submitSurvey", records.value);
+      console.log("surveyTopicId", surveyTopicId);
+      console.log("surveySessionId", surveySessionId.value);
+      console.log("questions", questions.value);
+
+      if (!questions.value || questions.value.length === 0) {
         store.setSnackbar(
           "Tidak ada pertanyaan.",
           store.colors?.ERROR ?? "error",
@@ -443,8 +509,10 @@ export default {
         );
         return;
       }
+
       const errors = validate();
       if (Object.keys(errors).length > 0) {
+        validationErrors.value = errors;
         store.setSnackbar(
           "Lengkapi semua field wajib (*)",
           store.colors?.ERROR ?? "error",
@@ -452,6 +520,8 @@ export default {
         );
         return;
       }
+      validationErrors.value = {};
+
       const answers = buildAnswers();
       if (answers.length === 0) {
         store.setSnackbar(
@@ -462,10 +532,13 @@ export default {
         return;
       }
 
+      console.log("answers", answers);
+
       isSubmitting.value = true;
       try {
         const payload = {
           survey_topic_id: surveyTopicId,
+          survey_session_id: surveySessionId.value,
           answers,
         };
         const response = await store.postRecord(
@@ -476,6 +549,7 @@ export default {
         );
 
         if (response?.data?.status) {
+          validationErrors.value = {};
           store.setSnackbar(
             response.data?.message ?? "Survey berhasil dikirim",
             store.colors?.SUCCESS ?? "success",
@@ -483,7 +557,10 @@ export default {
           );
           router.push({
             name: "sending-success",
-            query: { survey_id: surveyTopicId },
+            query: {
+              survey_id: surveyTopicId,
+              survey_session_id: surveySessionId.value,
+            },
           });
         } else {
           const msg =
@@ -528,6 +605,7 @@ export default {
       records,
       questions,
       isSubmitting,
+      validationErrors,
       surveySessionId,
       copySurveyId,
       coordinates,

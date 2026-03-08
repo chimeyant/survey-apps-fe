@@ -43,7 +43,7 @@
           <!-- Survey ID -->
           <div class="bg-gray-50 rounded-lg p-4 inline-block">
             <p class="text-sm text-gray-500 mb-1">ID Survey</p>
-            <p class="text-lg font-mono font-bold text-gray-900">{{ surveyId }}</p>
+            <p class="text-lg font-mono font-bold text-gray-900">{{ surveySessionId }}</p>
           </div>
         </div>
       </div>
@@ -364,6 +364,7 @@ import { UButton } from "@/components";
 const router = useRouter();
 const route = useRoute();
 const surveyId = ref("");
+const surveySessionId = ref("");
 
 const formatDate = (date) => {
   return date.toLocaleDateString("id-ID", {
@@ -390,15 +391,10 @@ const goToSurvey = () => {
   router.push("/survey");
 };
 
-const generateSurveyId = () => {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substr(2, 5);
-  return `SRV-${timestamp.toUpperCase()}-${random.toUpperCase()}`;
-};
-
 onMounted(() => {
   window.scrollTo(0, 0);
-  surveyId.value = route.params.id || route.query.id || generateSurveyId();
+  surveyId.value = route.query.survey_id;
+  surveySessionId.value = route.query.survey_session_id;
 });
 </script>
 

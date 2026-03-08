@@ -352,7 +352,8 @@ export default {
         if (!recs || !Array.isArray(recs)) return;
         recs.forEach((r) => {
           if (
-            (r.question_type === "lokasi" || r.question_type === "location-address") &&
+            (r.question_type === "lokasi" ||
+              r.question_type === "location-address") &&
             (questions.value[r.id] === undefined ||
               typeof questions.value[r.id] !== "object")
           ) {
@@ -685,6 +686,7 @@ export default {
     };
 
     const sendSurvey = async () => {
+      alert("sendSurvey");
       console.log(questions.value);
     };
 

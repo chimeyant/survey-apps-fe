@@ -193,7 +193,10 @@
             role="document"
           >
             <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 bg-gray-50">
-              <h2 id="qr-modal-title" class="text-lg font-semibold text-gray-900">
+              <h2
+                id="qr-modal-title"
+                class="text-lg font-semibold text-gray-900"
+              >
                 {{ qrMeta.name || "QR Survey" }}
               </h2>
               <button
@@ -206,11 +209,17 @@
               </button>
             </div>
             <div class="p-5 space-y-4">
-              <p v-if="qrMeta.description" class="text-sm text-gray-600">
+              <p
+                v-if="qrMeta.description"
+                class="text-sm text-gray-600"
+              >
                 {{ qrMeta.description }}
               </p>
               <div class="flex items-center justify-center min-h-[280px] rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <div v-if="qrLoading" class="text-sm text-gray-500 flex items-center gap-2">
+                <div
+                  v-if="qrLoading"
+                  class="text-sm text-gray-500 flex items-center gap-2"
+                >
                   <i class="ri-loader-4-line animate-spin text-lg"></i>
                   Menyiapkan QR Code...
                 </div>
@@ -220,7 +229,10 @@
                   alt="QR Code"
                   class="max-h-[320px] w-auto object-contain"
                 />
-                <div v-else class="text-sm text-red-600">
+                <div
+                  v-else
+                  class="text-sm text-red-600"
+                >
                   QR Code tidak tersedia.
                 </div>
               </div>
@@ -326,7 +338,13 @@ export default {
       { title: "Token", key: "token", align: "center", width: "120px" },
       { title: "QR", key: "qr", align: "center", width: "100px" },
       { title: "Status", key: "status", align: "center", width: "90px" },
-      { title: "Aksi", key: "id", align: "end", width: "80px", sortable: false },
+      {
+        title: "Aksi",
+        key: "id",
+        align: "end",
+        width: "80px",
+        sortable: false,
+      },
     ];
 
     const addNew = () => {
@@ -337,8 +355,9 @@ export default {
     const fetchRecords = async (payload = {}) => {
       const params = {
         page: payload.page ?? 1,
-        itemsPerPage: payload.itemsPerPage ?? table.value.footer?.itemsPerPage ?? 10,
-        keyWord: (payload.keyWord ?? payload.keyword) ?? keyWord.value ?? null,
+        itemsPerPage:
+          payload.itemsPerPage ?? table.value.footer?.itemsPerPage ?? 10,
+        keyWord: payload.keyWord ?? payload.keyword ?? keyWord.value ?? null,
       };
       const result = await store.fetchRecords(endpoint, params, true);
       store.setRecords(result?.data?.data ?? []);
@@ -352,9 +371,18 @@ export default {
     };
 
     const postRecord = async () => {
-      const result = await store.postRecord(endpoint, record.value, "store", true);
+      const result = await store.postRecord(
+        endpoint,
+        record.value,
+        "store",
+        true
+      );
       if (result?.data?.status) {
-        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          result.data.message,
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
         store.setForm({ add: false, edit: false });
         records.value.push(result.data.data);
       }
@@ -374,7 +402,11 @@ export default {
         true
       );
       if (result?.data?.status) {
-        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          result.data.message,
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
         store.setForm({ add: false, edit: false });
         store.changeRecord(result.data.data);
       }
@@ -393,7 +425,11 @@ export default {
         true
       );
       if (result?.data?.status) {
-        store.setSnackbar(result.data.message, colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          result.data.message,
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
         store.setForm({ add: false, edit: false, delete: false });
         store.removeRecord(result.data.data?.uuid);
         store.setRecord({});
@@ -413,7 +449,11 @@ export default {
         const topic = records.value.find((r) => r.uuid === uuid);
         if (!topic) {
           qrLoading.value = false;
-          store.setSnackbar("Data topik tidak ditemukan", colors.value.ERROR, types.value.ERROR);
+          store.setSnackbar(
+            "Data topik tidak ditemukan",
+            colors.value.ERROR,
+            types.value.ERROR
+          );
           showQrModal.value = false;
           return;
         }
@@ -424,17 +464,31 @@ export default {
           description: topic.description,
           url: surveyUrl,
         };
-        const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(surveyUrl)}`;
+        const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
+          surveyUrl
+        )}`;
         const response = await fetch(qrEndpoint);
         if (!response.ok) throw new Error("QR request failed");
         const blob = await response.blob();
-        const qrWithText = await composeQrImage(blob, topic.name, topic.description);
+        const qrWithText = await composeQrImage(
+          blob,
+          topic.name,
+          topic.description
+        );
         qrPreview.value = qrWithText;
-        store.setSnackbar("QR Code siap diunduh", colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          "QR Code siap diunduh",
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
       } catch (err) {
         console.error("openQrModal error:", err);
         showQrModal.value = false;
-        store.setSnackbar("Gagal menyiapkan QR Code", colors.value.ERROR, types.value.ERROR);
+        store.setSnackbar(
+          "Gagal menyiapkan QR Code",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
       } finally {
         qrLoading.value = false;
       }
@@ -452,7 +506,11 @@ export default {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      store.setSnackbar("QR Code berhasil diunduh", colors.value.SUCCESS, types.value.SUCCESS);
+      store.setSnackbar(
+        "QR Code berhasil diunduh",
+        colors.value.SUCCESS,
+        types.value.SUCCESS
+      );
     };
 
     const openLink = () => {
@@ -463,9 +521,17 @@ export default {
       if (!qrMeta.value?.url) return;
       try {
         await navigator.clipboard.writeText(qrMeta.value.url);
-        store.setSnackbar("Link disalin ke clipboard", colors.value.SUCCESS, types.value.SUCCESS);
+        store.setSnackbar(
+          "Link disalin ke clipboard",
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
       } catch (e) {
-        store.setSnackbar("Gagal menyalin link", colors.value.ERROR, types.value.ERROR);
+        store.setSnackbar(
+          "Gagal menyalin link",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
       }
     };
 
@@ -491,9 +557,23 @@ export default {
           ctx.textAlign = "center";
           const centerX = canvas.width / 2;
           ctx.font = "bold 24px Arial";
-          wrapAndDrawText(ctx, title || "Survey Topic", centerX, padding, canvas.width - padding * 2, 28);
+          wrapAndDrawText(
+            ctx,
+            title || "Survey Topic",
+            centerX,
+            padding,
+            canvas.width - padding * 2,
+            28
+          );
           ctx.font = "16px Arial";
-          wrapAndDrawText(ctx, description || "Scan QR untuk membuka survei.", centerX, padding + 40, canvas.width - padding * 2, 22);
+          wrapAndDrawText(
+            ctx,
+            description || "Scan QR untuk membuka survei.",
+            centerX,
+            padding + 40,
+            canvas.width - padding * 2,
+            22
+          );
           ctx.drawImage(img, padding, infoHeight, img.width, img.height);
           resolve(canvas.toDataURL("image/png"));
         };
@@ -507,7 +587,14 @@ export default {
       });
     };
 
-    const wrapAndDrawText = (ctx, text, centerX, startY, maxWidth, lineHeight) => {
+    const wrapAndDrawText = (
+      ctx,
+      text,
+      centerX,
+      startY,
+      maxWidth,
+      lineHeight
+    ) => {
       const words = text.split(" ");
       let line = "";
       let y = startY;
@@ -526,7 +613,10 @@ export default {
     };
 
     const showTopicQuestionPage = (uuid) => {
-      router.push({ name: "survey-topic-question-management", params: { survey_topic_id: uuid } });
+      router.push({
+        name: "survey-topic-question-management",
+        params: { survey_topic_id: uuid },
+      });
     };
 
     const onSearch = debounce(() => {

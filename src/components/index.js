@@ -35,9 +35,10 @@ import UFileViewer from "./FileViewer/index.vue"
 import UCheckbox from "./CheckBox/index.vue"
 import UCheckboxGroup from "./CheckBox/CheckboxGroup.vue"
 import UDateTimePicker from "./DateTimePicker/index.vue"
+import USwal from "./Swal/index.vue"
 
 import UTable from "./Table/index.vue"
 
 
 
-export { UPagination, UComboBox, UPhoneInput, UButton, UTextField, UTextArea, USwitch, UToast, UDataTable, UDataMobile, UFormPage, UDropdownOpsi, UFormDelete, USkeletonTable, UFormDialog, UFormDataTable, UFileUpload, UBreadcrumb, UChip, BarChart, PieChart, AreaChart, CardOne, CardTwo, CardThree, CardFour, UMap, UMapCoordinatePicker, UPhotoUpload, UThemeSwitcher, UThemeDemo, UFormCustomePage, UTable, UFileViewer, UCheckbox, UCheckboxGroup, UDateTimePicker }
+export { UPagination, UComboBox, UPhoneInput, UButton, UTextField, UTextArea, USwitch, UToast, UDataTable, UDataMobile, UFormPage, UDropdownOpsi, UFormDelete, USkeletonTable, UFormDialog, UFormDataTable, UFileUpload, UBreadcrumb, UChip, BarChart, PieChart, AreaChart, CardOne, CardTwo, CardThree, CardFour, UMap, UMapCoordinatePicker, UPhotoUpload, UThemeSwitcher, UThemeDemo, UFormCustomePage, UTable, UFileViewer, UCheckbox, UCheckboxGroup, UDateTimePicker, USwal }

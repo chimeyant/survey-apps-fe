@@ -1,11 +1,12 @@
 <script setup>
+import { USwal } from "@/components";
 </script>
 
 <template>
   <div>
+    <USwal />
     <router-view />
   </div>
-
 </template>
 
 <style scoped>
