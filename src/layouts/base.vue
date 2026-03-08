@@ -222,7 +222,7 @@
         </div>
       </div>
     </transition>
-    <div class="w-full h-full bg-white flex flex-col">
+    <div class="w-full min-w-0 h-full bg-white flex flex-col overflow-x-hidden">
       <!-- Top bar -->
       <header class="h-14 flex-shrink-0 flex items-center justify-between gap-4 px-4 sm:px-6 bg-white border-b border-gray-200">
         <!-- Left: menu -->
@@ -353,10 +353,10 @@
           </transition>
         </div>
       </header>
-      <div class="h-[calc(100vh-6rem)] p-4 sm:p-5 overflow-y-hidden flex flex-col bg-white">
+      <div class="h-[calc(100vh-6rem)] p-4 sm:p-5 overflow-y-hidden overflow-x-hidden flex flex-col bg-white min-w-0">
         <!-- Breadcrumb -->
         <UBreadcrumb :breadcrumbs="page.breadcrumbs" />
-        <div class="w-full h-full overflow-y-scroll text-gray-900">
+        <div class="w-full min-w-0 max-w-full h-full overflow-y-scroll overflow-x-auto text-gray-900">
           <router-view />
         </div>
       </div>

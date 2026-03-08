@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-col w-full min-h-full">
+  <div class="flex flex-col w-full min-w-0 max-w-full min-h-full overflow-hidden">
     <UFormDataTable
+      class="min-w-0 max-w-full"
       :title="page.title"
       :subtitle="page.subtitle"
       @onRefresh="fetchRecords({})"
@@ -25,11 +26,56 @@
                 <span class="font-medium line-clamp-2">{{ item.respondent_id || '—' }}</span>
               </td>
               <td
-                v-for="q in questionColumnsFirstThree"
+                v-for="q in questionColumns"
                 :key="q.survey_topic_question_id"
                 class="px-4 py-3 text-sm text-gray-700 max-w-[180px]"
               >
-                <span class="line-clamp-2">{{ getAnswerForQuestion(item, q.survey_topic_question_id) }}</span>
+                <span
+                  v-if="isCheckboxChecked(getAnswerRow(item, q.survey_topic_question_id))"
+                  class="inline-flex text-emerald-600"
+                  title="Tercentang"
+                >
+                  <i class="ri-checkbox-circle-fill text-lg"></i>
+                </span>
+                <span
+                  v-else-if="isCheckboxOrSwitchUnchecked(getAnswerRow(item, q.survey_topic_question_id))"
+                  class="inline-flex text-gray-400"
+                  title="Tidak tercentang"
+                >
+                  <i class="ri-close-circle-line text-lg"></i>
+                </span>
+                <span
+                  v-else-if="isLocationAnswer(getAnswerRow(item, q.survey_topic_question_id))"
+                  class="inline-flex"
+                >
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1"
+                    title="Lihat di peta"
+                    @click="openMapModal(getAnswerRow(item, q.survey_topic_question_id))"
+                  >
+                    <i class="ri-map-pin-line text-base"></i>
+                    Peta
+                  </button>
+                </span>
+                <span
+                  v-else-if="isFileAnswer(getAnswerRow(item, q.survey_topic_question_id))"
+                  class="inline-flex"
+                >
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    title="Lihat file"
+                    @click="openFileViewer(getAnswerRow(item, q.survey_topic_question_id))"
+                  >
+                    <i class="ri-file-view-line text-base"></i>
+                    View
+                  </button>
+                </span>
+                <span
+                  v-else
+                  class="line-clamp-2"
+                >{{ getAnswerForQuestion(item, q.survey_topic_question_id) }}</span>
               </td>
 
               <td class="px-4 py-3 text-right">
@@ -362,6 +408,83 @@
         </div>
       </transition>
     </teleport>
+
+    <!-- Modal Peta (location) -->
+    <teleport to="body">
+      <transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showMapModal"
+          class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="map-modal-title"
+        >
+          <div
+            class="absolute inset-0 bg-black/50"
+            aria-hidden="true"
+            @click="closeMapModal"
+          />
+          <div
+            class="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-xl bg-white shadow-xl overflow-hidden"
+            role="document"
+          >
+            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 bg-gray-50 shrink-0">
+              <h2
+                id="map-modal-title"
+                class="text-lg font-semibold text-gray-900"
+              >
+                Lokasi
+              </h2>
+              <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+                aria-label="Tutup"
+                @click="closeMapModal"
+              >
+                <i class="ri-close-line text-xl"></i>
+              </button>
+            </div>
+            <div class="flex-1 min-h-[320px] overflow-auto p-5">
+              <UMap
+                v-if="mapLocation"
+                :latitude="mapLocation.lat"
+                :longitude="mapLocation.lng"
+                :show-default-marker="!!(mapLocation.lat && mapLocation.lng)"
+              />
+              <p
+                v-else
+                class="text-sm text-gray-500 py-4"
+              >Koordinat tidak tersedia.</p>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4 shrink-0">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1"
+                @click="closeMapModal"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
+
+    <UFileViewer
+      :visible="showFileViewer"
+      :file-url="fileViewerData.url"
+      :file-name="fileViewerData.fileName"
+      :file-size="fileViewerData.fileSize"
+      :file-type="fileViewerData.fileType"
+      @close="closeFileViewer"
+    />
   </div>
 </template>
   
@@ -376,6 +499,8 @@ import {
   UFormDelete,
   UFormDialog,
   UFormDataTable,
+  UFileViewer,
+  UMap,
   UTextArea,
   UTextField,
   USwitch,
@@ -390,6 +515,8 @@ export default {
     UFormDelete,
     UFormDialog,
     UFormDataTable,
+    UFileViewer,
+    UMap,
     UTextArea,
     UTextField,
     USwitch,
@@ -423,6 +550,9 @@ export default {
     const showDetailJawaban = ref(false);
     const detailRespondent = ref(null);
 
+    const showMapModal = ref(false);
+    const mapLocation = ref(null);
+
     const openDetailJawaban = (item) => {
       detailRespondent.value = item;
       showDetailJawaban.value = true;
@@ -433,8 +563,181 @@ export default {
       detailRespondent.value = null;
     };
 
-    const formatAnswer = (row) => {
-      if (row.answer_text) return row.answer_text;
+    const isLocationAnswer = (row) => {
+      return row && (row.question_type || "").toLowerCase() === "location";
+    };
+
+    const getLocationFromAnswer = (row) => {
+      if (!row) return null;
+      let lat = null;
+      let lng = null;
+      if (row.answer_json != null && row.answer_json !== "") {
+        try {
+          const parsed =
+            typeof row.answer_json === "string"
+              ? JSON.parse(row.answer_json)
+              : row.answer_json;
+          if (parsed && typeof parsed === "object") {
+            lat = parsed.latitude ?? parsed.lat ?? parsed.latLng?.[0];
+            lng = parsed.longitude ?? parsed.lng ?? parsed.latLng?.[1];
+          }
+        } catch (_) {}
+      }
+      if ((lat == null || lng == null) && row.answer_text) {
+        const parts = String(row.answer_text).split(/[,;\s]+/);
+        if (parts.length >= 2) {
+          lat = parseFloat(parts[0]);
+          lng = parseFloat(parts[1]);
+        }
+      }
+      if (
+        lat != null &&
+        lng != null &&
+        !Number.isNaN(lat) &&
+        !Number.isNaN(lng)
+      ) {
+        return { lat, lng };
+      }
+      return null;
+    };
+
+    const openMapModal = (row) => {
+      const loc = getLocationFromAnswer(row);
+      mapLocation.value = loc || { lat: -6.1783, lng: 106.6319 };
+      showMapModal.value = true;
+    };
+
+    const closeMapModal = () => {
+      showMapModal.value = false;
+      mapLocation.value = null;
+    };
+
+    const showFileViewer = ref(false);
+    const fileViewerData = ref({
+      url: "",
+      fileName: "File",
+      fileSize: "",
+      fileType: "",
+    });
+
+    const isFileAnswer = (row) => {
+      return row && (row.question_type || "").toLowerCase() === "file";
+    };
+
+    const getFileInfoFromAnswer = (row) => {
+      if (!row) return null;
+      let url = "";
+      let fileName = "File";
+      let fileSize = "";
+      let fileType = "";
+      if (row.answer_json != null && row.answer_json !== "") {
+        try {
+          const parsed =
+            typeof row.answer_json === "string"
+              ? JSON.parse(row.answer_json)
+              : row.answer_json;
+          if (parsed && typeof parsed === "object") {
+            url = parsed.url ?? parsed.path ?? parsed.src ?? "";
+            fileName =
+              parsed.fileName ?? parsed.file_name ?? parsed.name ?? fileName;
+            fileSize =
+              parsed.fileSize ?? parsed.file_size ?? parsed.size ?? fileSize;
+            fileType =
+              parsed.fileType ?? parsed.file_type ?? parsed.type ?? fileType;
+          }
+        } catch (_) {}
+      }
+      if (!url && row.answer_text) {
+        url = String(row.answer_text).trim();
+        const parts = url.split("/").filter(Boolean);
+        if (parts.length) fileName = parts[parts.length - 1];
+      }
+      if (
+        url &&
+        !url.startsWith("http://") &&
+        !url.startsWith("https://") &&
+        !url.startsWith("blob:")
+      ) {
+        const baseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+        const pathOrFilename = url.replace(/^\/?documents\/?/i, "");
+        url = `${baseUrl}/api/v1/media-file/download/documents/${pathOrFilename}`;
+      }
+      if (!url) return null;
+      if (!fileType && fileName) {
+        const ext = fileName.split(".").pop()?.toLowerCase() || "";
+        fileType = ext;
+      }
+      return { url, fileName, fileSize, fileType };
+    };
+
+    const openFileViewer = (row) => {
+      const info = getFileInfoFromAnswer(row);
+      if (info) {
+        fileViewerData.value = { ...info };
+        showFileViewer.value = true;
+      }
+    };
+
+    const closeFileViewer = () => {
+      showFileViewer.value = false;
+      fileViewerData.value = {
+        url: "",
+        fileName: "File",
+        fileSize: "",
+        fileType: "",
+      };
+    };
+
+    const parseQuestionOptions = (json) => {
+      if (json == null) return [];
+      try {
+        const arr = typeof json === "string" ? JSON.parse(json) : json;
+        return Array.isArray(arr) ? arr : [];
+      } catch {
+        return [];
+      }
+    };
+
+    /** Map question_id -> question_options dari jawaban mana pun yang punya options (untuk fallback baris pertama) */
+    const questionOptionsByQuestionId = computed(() => {
+      const map = {};
+      for (const r of records.value) {
+        const list = r.survey_topic_question_answers || [];
+        for (const a of list) {
+          const id = a.survey_topic_question_id;
+          if (
+            id != null &&
+            a.question_options != null &&
+            a.question_options !== ""
+          ) {
+            if (!map[id]) map[id] = a.question_options;
+          }
+        }
+      }
+      return map;
+    });
+
+    const formatAnswer = (row, fallbackQuestionOptions) => {
+      const rawValue = row.answer_text || "";
+      const qType = (row.question_type || "").toLowerCase();
+
+      if (qType === "select") {
+        const optionsJson = row.question_options ?? fallbackQuestionOptions;
+        if (optionsJson != null) {
+          const opts = parseQuestionOptions(optionsJson);
+          const selected = opts.find(
+            (o) =>
+              String(o.value ?? o.id ?? "") === String(rawValue) ||
+              String(o.label ?? o.title ?? o.name ?? "") === String(rawValue)
+          );
+          if (selected) {
+            const label = selected.label ?? selected.title ?? selected.name;
+            return label || rawValue || "—";
+          }
+        }
+      }
+
+      if (rawValue) return rawValue;
       if (row.answer_json != null && row.answer_json !== "") {
         try {
           const parsed =
@@ -472,14 +775,22 @@ export default {
       }
       return Object.values(byQuestion).map((g) => {
         const firstThree = g.items.slice(0, 3);
+        const qId = g.items[0]?.survey_topic_question_id;
+        const fallbackOpts = questionOptionsByQuestionId.value[qId];
         return {
           key: g.key,
           question_text: g.question_text,
           question_type: g.question_type,
           question_required: g.question_required,
-          jawaban1: firstThree[0] ? formatAnswer(firstThree[0]) : "—",
-          jawaban2: firstThree[1] ? formatAnswer(firstThree[1]) : "—",
-          jawaban3: firstThree[2] ? formatAnswer(firstThree[2]) : "—",
+          jawaban1: firstThree[0]
+            ? formatAnswer(firstThree[0], fallbackOpts)
+            : "—",
+          jawaban2: firstThree[1]
+            ? formatAnswer(firstThree[1], fallbackOpts)
+            : "—",
+          jawaban3: firstThree[2]
+            ? formatAnswer(firstThree[2], fallbackOpts)
+            : "—",
         };
       });
     });
@@ -502,11 +813,6 @@ export default {
       return Array.from(seen.values());
     });
 
-    /** Tiga pertanyaan pertama saja untuk kolom tabel */
-    const questionColumnsFirstThree = computed(() =>
-      questionColumns.value.slice(0, 3)
-    );
-
     const tableHeaders = computed(() => {
       const base = [
         { title: "#", key: "ids", align: "center", width: "50px" },
@@ -517,7 +823,7 @@ export default {
           width: "200px",
         },
       ];
-      const questionHeaders = questionColumnsFirstThree.value.map((q) => ({
+      const questionHeaders = questionColumns.value.map((q) => ({
         title: q.question_text,
         key: `q_${q.survey_topic_question_id}`,
         align: "start",
@@ -540,7 +846,41 @@ export default {
       const found = answers.find(
         (a) => a.survey_topic_question_id === questionId
       );
-      return found ? formatAnswer(found) : "—";
+      if (!found) return "—";
+      const fallbackOpts = questionOptionsByQuestionId.value[questionId];
+      return formatAnswer(found, fallbackOpts);
+    };
+
+    const getAnswerRow = (respondent, questionId) => {
+      const answers = respondent.survey_topic_question_answers || [];
+      return (
+        answers.find((a) => a.survey_topic_question_id === questionId) || null
+      );
+    };
+
+    const isCheckboxChecked = (row) => {
+      if (!row) return false;
+      const qType = (row.question_type || "").toLowerCase();
+      const v = row.answer_text;
+
+      if (qType === "switch") {
+        return v === "true" || v === true || v === "1";
+      }
+      if (qType === "checkbox") {
+        if (v === "1" || v === "true" || v === true) return true;
+        if (v === "0" || v === "false" || v === false || v === "" || v == null)
+          return false;
+        return Boolean(v);
+      }
+      return false;
+    };
+
+    const isCheckboxOrSwitchUnchecked = (row) => {
+      if (!row) return false;
+      const qType = (row.question_type || "").toLowerCase();
+      if (qType !== "checkbox" && qType !== "switch") return false;
+      const v = row.answer_text;
+      return v === "false" || v === false || v === "0" || v === "" || v == null;
     };
 
     const addNew = () => {
@@ -861,8 +1201,10 @@ export default {
       keyWord,
       tableHeaders,
       questionColumns,
-      questionColumnsFirstThree,
       getAnswerForQuestion,
+      getAnswerRow,
+      isCheckboxChecked,
+      isCheckboxOrSwitchUnchecked,
       addNew,
       fetchRecords,
       postRecord,
@@ -885,6 +1227,16 @@ export default {
       openDetailJawaban,
       closeDetailJawaban,
       formatAnswer,
+      isLocationAnswer,
+      openMapModal,
+      closeMapModal,
+      showMapModal,
+      mapLocation,
+      isFileAnswer,
+      openFileViewer,
+      closeFileViewer,
+      showFileViewer,
+      fileViewerData,
       detailAnswerRows,
     };
   },

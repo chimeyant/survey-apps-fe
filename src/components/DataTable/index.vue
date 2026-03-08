@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useAppStore } from "@/store/app";
 import USkeletonTable from "../SkeletonTable/index.vue";
 
@@ -60,17 +60,17 @@ export default {
     const store = useAppStore();
     const table = computed(() => store.table);
 
-    watch(table.value.footer, (newVal) => {
+    watch(() => table.value?.footer, (newVal) => {
+      if (!newVal) return;
       const params = {
         page: newVal.currentPage,
         itemsPerPage: newVal.itemsPerPage,
         keyword: newVal.keyword,
       };
-
       emit("update:options", params);
-    });
+    }, { deep: true });
 
-    const headers = ref(props.headers);
+    const headers = computed(() => props.headers || []);
     return {
       table,
       headers,
