@@ -81,23 +81,6 @@
               <td class="px-4 py-3 text-right">
                 <UDropdownOpsi>
                   <template #menu>
-                    <button
-                      type="button"
-                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                      @click="showTopicQuestionPage(item.uuid)"
-                    >
-                      <i class="ri-article-line text-lg text-indigo-600"></i>
-                      <span>Template Formulir Survey</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                      @click="openDetailJawaban(item)"
-                    >
-                      <i class="ri-group-line text-lg text-indigo-600"></i>
-                      <span>Data Responden</span>
-                    </button>
 
                     <button
                       v-if="page.actions.edit"
@@ -1178,11 +1161,11 @@ export default {
         actions: {
           refresh: true,
           add: false,
-          edit: true,
-          delete: true,
+          edit: false,
+          delete: false,
           bulkdelete: false,
-          export: false,
-          print: false,
+          export: true,
+          print: true,
           help: false,
           close: false,
           search: true,
