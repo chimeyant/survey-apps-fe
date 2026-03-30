@@ -692,6 +692,103 @@ export default {
       }
     };
 
+    /** Label kecamatan/desa untuk jawaban tipe lokasi (Kecamatan & Desa) */
+    const districtLabelByCode = ref({});
+    const villageLabelByComposite = ref({});
+
+    const parseLocationAddressPayload = (row) => {
+      if (!row) return null;
+      const qType = (row.question_type || "").toLowerCase();
+      if (qType !== "location-address" && qType !== "lokasi") return null;
+      let obj = null;
+      if (row.answer_json != null && row.answer_json !== "") {
+        try {
+          obj =
+            typeof row.answer_json === "string"
+              ? JSON.parse(row.answer_json)
+              : row.answer_json;
+        } catch (_) {}
+      }
+      if (
+        !obj &&
+        row.answer_text &&
+        String(row.answer_text).trim().startsWith("{")
+      ) {
+        try {
+          obj = JSON.parse(row.answer_text);
+        } catch (_) {}
+      }
+      if (!obj || typeof obj !== "object") return null;
+      const district_code = String(
+        obj.district_code ?? obj.district ?? ""
+      ).trim();
+      const village_code = String(
+        obj.village_code ?? obj.village ?? ""
+      ).trim();
+      if (!district_code && !village_code) return null;
+      return { district_code, village_code };
+    };
+
+    const hydrateLocationAddressLabels = async () => {
+      const districtSet = new Set();
+      for (const r of records.value) {
+        for (const a of r.survey_topic_question_answers || []) {
+          const codes = parseLocationAddressPayload(a);
+          if (codes?.district_code) districtSet.add(codes.district_code);
+        }
+      }
+      if (!districtSet.size) return;
+      try {
+        const data = await store.getCombo("/api/v1/combo/districts", true);
+        const list = Array.isArray(data) ? data : [];
+        const dmap = { ...districtLabelByCode.value };
+        for (const d of list) {
+          const code = String(d.value ?? d.code ?? "").trim();
+          const title = (d.title ?? d.name ?? "").trim();
+          if (code) dmap[code] = title || code;
+        }
+        districtLabelByCode.value = dmap;
+      } catch (e) {
+        console.error("hydrateLocationAddressLabels districts:", e);
+      }
+      const vmap = { ...villageLabelByComposite.value };
+      for (const dist of districtSet) {
+        try {
+          const data = await store.getCombo(
+            `/api/v1/combo/villages/${encodeURIComponent(dist)}`,
+            true
+          );
+          const list = Array.isArray(data) ? data : [];
+          for (const v of list) {
+            const code = String(v.value ?? v.code ?? "").trim();
+            const title = (v.title ?? v.name ?? "").trim();
+            if (code) {
+              vmap[`${dist}:${code}`] = title || code;
+              if (!vmap[code]) vmap[code] = title || code;
+            }
+          }
+        } catch (e) {
+          console.error("hydrateLocationAddressLabels villages:", dist, e);
+        }
+      }
+      villageLabelByComposite.value = vmap;
+    };
+
+    const formatLocationAddressAnswer = (row) => {
+      const codes = parseLocationAddressPayload(row);
+      if (!codes) return "—";
+      const dName =
+        districtLabelByCode.value[codes.district_code] || codes.district_code;
+      const vKey = `${codes.district_code}:${codes.village_code}`;
+      const vName =
+        villageLabelByComposite.value[vKey] ||
+        villageLabelByComposite.value[codes.village_code] ||
+        codes.village_code;
+      if (dName && vName)
+        return `${dName} — ${vName}`;
+      return dName || vName || "—";
+    };
+
     /** Map question_id -> question_options dari jawaban mana pun yang punya options (untuk fallback baris pertama) */
     const questionOptionsByQuestionId = computed(() => {
       const map = {};
@@ -714,6 +811,10 @@ export default {
     const formatAnswer = (row, fallbackQuestionOptions) => {
       const rawValue = row.answer_text || "";
       const qType = (row.question_type || "").toLowerCase();
+
+      if (qType === "location-address" || qType === "lokasi") {
+        return formatLocationAddressAnswer(row);
+      }
 
       if (qType === "select") {
         const optionsJson = row.question_options ?? fallbackQuestionOptions;
@@ -907,6 +1008,7 @@ export default {
         table.value.footer.lastPage = result.data.meta.last_page;
         table.value.footer.firstPage = result.data.meta.first_page ?? 1;
       }
+      hydrateLocationAddressLabels();
     };
 
     const postRecord = async () => {
