@@ -207,6 +207,7 @@ export default {
     ]);
     const dashboard = ref({
       totalSurvey: 0,
+      totalQuestion: 0,
       totalResponden: 0,
     });
     const selectedMapTopic = ref("");
@@ -225,10 +226,24 @@ export default {
         const result = await store.showRecord("api/v1/survey/dashboard", true);
         if (result) {
           dashboard.value.totalSurvey = result.total_survey ?? 0;
+          dashboard.value.totalQuestion = result.total_question ?? 0;
           dashboard.value.totalResponden = result.total_responden ?? 0;
         }
       } catch (_) {
-        dashboard.value = { totalSurvey: 0, totalResponden: 0 };
+        dashboard.value = { totalSurvey: 0, totalQuestion: 0, totalResponden: 0 };
+      }
+    };
+
+    const fetchTopicStatistics = async () => {
+      try {
+        const result = await store.showRecord(
+          "api/v1/survey/dashboard/topic-statistics",
+          true
+        );
+        topicStats.value = Array.isArray(result) ? result : [];
+      } catch (e) {
+        console.error("Error fetching topic statistics:", e);
+        topicStats.value = [];
       }
     };
 
@@ -244,13 +259,15 @@ export default {
           markers.value = result.data.data.map((item) => ({
             latLng: [Number(item.latitude), Number(item.longitude)],
             title: item.survey_name || "Survey Location",
+            topicUuid: item.survey_topic_uuid || "",
             popup: buildPopupContent(item),
             icon: markerIcon.value,
           }));
           if (
             selectedMapTopic.value &&
             !result.data.data.some(
-              (item) => (item?.survey_name || "Tanpa Topik") === selectedMapTopic.value
+              (item) =>
+                (item?.survey_topic_uuid || "") === selectedMapTopic.value
             )
           ) {
             selectedMapTopic.value = "";
@@ -275,45 +292,47 @@ export default {
     };
 
     const mapTopicOptions = computed(() => {
-      const uniq = new Set();
+      const uniq = new Map();
       for (const row of sebaranRows.value) {
         if (!isValidCoord(row)) continue;
-        uniq.add((row?.survey_name || "Tanpa Topik").trim() || "Tanpa Topik");
+        const topicUuid = (row?.survey_topic_uuid || "").trim();
+        const topicName = (row?.survey_name || "Tanpa Topik").trim() || "Tanpa Topik";
+        if (!topicUuid) continue;
+        if (!uniq.has(topicUuid)) uniq.set(topicUuid, topicName);
       }
-      return Array.from(uniq)
-        .sort((a, b) => a.localeCompare(b, "id"))
-        .map((name) => ({
-          title: name,
-          value: name,
+      return Array.from(uniq.entries())
+        .sort((a, b) => a[1].localeCompare(b[1], "id"))
+        .map(([value, title]) => ({
+          title,
+          value,
         }));
     });
 
     const filteredMarkers = computed(() => {
       if (!selectedMapTopic.value) return [];
-      return markers.value.filter((m) => m.title === selectedMapTopic.value);
+      return markers.value.filter((m) => m.topicUuid === selectedMapTopic.value);
     });
 
-    const topicStats = computed(() => {
-      const map = {};
-      for (const row of sebaranRows.value) {
-        const key = (row?.survey_name || "Tanpa Topik").trim() || "Tanpa Topik";
-        map[key] = (map[key] || 0) + 1;
-      }
-      return Object.entries(map)
-        .map(([topic, total]) => ({ topic, total }))
-        .sort((a, b) => b.total - a.total);
-    });
+    const topicStats = ref([]);
 
     const maxTopicTotal = computed(() => {
-      return topicStats.value.length ? topicStats.value[0].total : 0;
+      return topicStats.value.length ? topicStats.value[0].total_responden : 0;
     });
 
     const topicStatsTopFive = computed(() => {
       const max = maxTopicTotal.value || 1;
-      return topicStats.value.slice(0, 5).map((item) => ({
-        ...item,
-        percentage: Math.max(8, Math.round((item.total / max) * 100)),
-      }));
+      return [...topicStats.value]
+        .sort((a, b) => (b.total_responden || 0) - (a.total_responden || 0))
+        .slice(0, 5)
+        .map((item) => ({
+          topic: item.topic_name || "Tanpa Topik",
+          total: item.total_responden || 0,
+          totalQuestion: item.total_question || 0,
+          percentage: Math.max(
+            8,
+            Math.round(((item.total_responden || 0) / max) * 100)
+          ),
+        }));
     });
 
     const averageRespondentPerTopic = computed(() => {
@@ -324,14 +343,21 @@ export default {
     });
 
     const bestTopicName = computed(() => {
-      return topicStats.value[0]?.topic || "Belum ada data";
+      const sorted = [...topicStats.value].sort(
+        (a, b) => (b.total_responden || 0) - (a.total_responden || 0)
+      );
+      return sorted[0]?.topic_name || "Belum ada data";
     });
 
     const bestTopicTotal = computed(() => {
-      return topicStats.value[0]?.total || 0;
+      const sorted = [...topicStats.value].sort(
+        (a, b) => (b.total_responden || 0) - (a.total_responden || 0)
+      );
+      return sorted[0]?.total_responden || 0;
     });
 
     function buildPopupContent(item) {
+      const respondentId = item.respondent_id || "—";
       const phone = item.phone || "";
       const phoneClean = phone.replace(/[^0-9]/g, "");
       const waLink = phoneClean ? `https://wa.me/${phoneClean}` : "#";
@@ -370,6 +396,7 @@ export default {
               ? `<div class="text-gray-500 mt-0.5">${item.surveyor_name}</div>`
               : ""
           }
+          <div class="text-gray-500 mt-0.5">Respondent ID: ${respondentId}</div>
           ${
             phone
               ? `<div class="mt-1 flex items-center gap-1">
@@ -409,6 +436,7 @@ export default {
         showtable: false,
       });
       fetchDashboard();
+      fetchTopicStatistics();
       fetchSebaranResponden();
     });
 
