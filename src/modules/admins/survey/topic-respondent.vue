@@ -6,6 +6,7 @@
       :subtitle="page.subtitle"
       @onRefresh="fetchRecords({})"
       @onAdd="addNew"
+      @onExport="exportToExcel"
       v-model:keyWord="keyWord"
     >
       <template #data-table>
@@ -1265,6 +1266,43 @@ export default {
       fetchRecords({ keyWord: keyWord.value, page: 1 });
     }, 400);
 
+    const exportToExcel = async () => {
+      try {
+        const topicId = route.params.survey_topic_id;
+        const params = new URLSearchParams({
+          keyWord: keyWord.value || "",
+        });
+        const url = `api/v1/survey/survey-topic-respondents-export/${topicId}?${params.toString()}`;
+        const response = await store.fetchExport(url);
+        const blob = new Blob([response.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute(
+          "download",
+          `Responden_Topik_${new Date().getTime()}.xlsx`
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        store.setSnackbar(
+          "Export berhasil",
+          colors.value.SUCCESS,
+          types.value.SUCCESS
+        );
+      } catch (error) {
+        console.error("Export failed:", error);
+        store.setSnackbar(
+          "Export gagal",
+          colors.value.ERROR,
+          types.value.ERROR
+        );
+      }
+    };
+
     watch(keyWord, () => onSearch());
 
     onMounted(() => {
@@ -1344,6 +1382,7 @@ export default {
       showFileViewer,
       fileViewerData,
       detailAnswerRows,
+      exportToExcel,
     };
   },
 };
