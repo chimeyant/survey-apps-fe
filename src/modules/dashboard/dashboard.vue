@@ -361,19 +361,19 @@ export default {
       const phone = item.phone || "";
       const phoneClean = phone.replace(/[^0-9]/g, "");
       const waLink = phoneClean ? `https://wa.me/${phoneClean}` : "#";
-      const atts = Array.isArray(item.attachments)
-        ? item.attachments.slice(0, 3)
+      const photos = Array.isArray(item.photos)
+        ? item.photos.slice(0, 3)
         : [];
-      const attsHtml = atts
+      const photoHtml = photos
         .map(
-          (att, idx) => `
+          (photo, idx) => `
         <div class="w-20 flex-shrink-0 rounded bg-gray-100 p-1">
           <img
-            src="${att.path}"
-            alt="Lampiran ${idx + 1}"
+            src="${photo}"
+            alt="Foto ${idx + 1}"
             class="h-20 w-full object-contain cursor-pointer rounded"
             onclick="event.stopPropagation(); window.open('${
-              att.path
+              photo
             }', '_blank', 'width=800,height=600');"
           />
         </div>
@@ -408,8 +408,8 @@ export default {
               : ""
           }
           ${
-            atts.length
-              ? `<div class="mt-2 font-medium text-gray-600">Lampiran</div><div class="flex gap-2 mt-1 flex-wrap">${attsHtml}</div>`
+            photos.length
+              ? `<div class="mt-2 font-medium text-gray-600">Foto</div><div class="flex gap-2 mt-1 flex-wrap">${photoHtml}</div>`
               : ""
           }
         </div>
